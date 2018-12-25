@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
   mergeRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MergeRequest' }],
 });
 
-UserSchema.index({ id: 1, username: 1 }, { unique: true });
+UserSchema.index({ id: 1 }, { unique: true });
 const model = mongoose.model('User', UserSchema);
 
 module.exports = model;

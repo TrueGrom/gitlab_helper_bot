@@ -12,6 +12,9 @@ async function start(ctx) {
       return ctx.reply('Access can be obtained only from a group');
     }
     const group = await Group.findOne({ id: ctx.chat.id });
+    if (!group) {
+      return ctx.reply('');
+    }
     if (group.users.includes(ctx.from.id)) {
       return ctx.reply('Access already granted');
     }

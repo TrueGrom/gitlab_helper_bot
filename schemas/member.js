@@ -11,7 +11,7 @@ const MemberSchema = new mongoose.Schema({
   expires_at: Date,
 });
 
-MemberSchema.index({ username: 1 }, { unique: true });
+MemberSchema.index({ id: 1 }, { unique: true });
 const model = mongoose.model('Member', MemberSchema);
 
 module.exports = model;

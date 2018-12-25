@@ -16,7 +16,7 @@ function access() {
       if (allGroups && getAllUsersFromGroups(allGroups).includes(ctx.from.id)) {
         return next(ctx);
       }
-      return ctx.isGroupChat() ? ctx.reply('') : ctx.reply(DEFAULT_MESSAGE);
+      return ctx.reply('');
     } catch (e) {
       logger.error(e);
       return ctx.reply('Error');

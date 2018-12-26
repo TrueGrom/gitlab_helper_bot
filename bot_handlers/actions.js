@@ -11,7 +11,7 @@ async function attachUser(ctx) {
     }
     await User.create({ ...newUser, approver: true });
     logger.info(`@${ctx.session.attach.tgUser} attached to ${gitlabUsername}`);
-    return ctx.editMessageText(`${ctx.session.attach.message} *${gitlabUsername}*`, { parse_mode: 'Markdown' });
+    return ctx.editMessageText(`${ctx.session.attach.message} <b>${gitlabUsername}</b>`, { parse_mode: 'HTML' });
   } catch (e) {
     logger.error(e);
     return ctx.editMessageText('Error');

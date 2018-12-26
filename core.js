@@ -28,7 +28,7 @@ bot.telegram.getMe().then((botInfo) => {
 });
 
 bot.context.isGroupChat = function () {
-  return this.chat.type === 'group';
+  return this.chat.type === 'group' || this.chat.type === 'supergroup';
 };
 
 bot.context.isPrivateChat = function () {

@@ -19,7 +19,7 @@ async function selectMembers(ctx, prefix) {
   } catch (e) {
     logger.error(e);
     ctx.scene.leave();
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 
@@ -29,7 +29,7 @@ async function rejectAttachment(ctx) {
     return ctx.replyWithMarkdown(`${ctx.session.attach.reject} *${gitlabUsername}*`);
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   } finally {
     ctx.scene.leave();
   }

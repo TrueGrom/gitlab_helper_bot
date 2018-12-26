@@ -48,6 +48,9 @@ bot.context.isAdmin = function () {
   return this.from.id === ADMIN_ID;
 };
 
+bot.context.reportError = function (error) {
+  return bot.telegram.sendMessage(ADMIN_ID, error);
+};
 
 express.listen(BOT_PORT, () => {
   logger.info(`listening on port ${BOT_PORT}`);

@@ -35,7 +35,7 @@ async function enableNotifications(ctx) {
     return ctx.reply('Notifications has been enabled');
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 
@@ -45,7 +45,7 @@ async function disableNotifications(ctx) {
     return ctx.reply('Notifications has been disabled');
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 
@@ -69,7 +69,7 @@ async function activateChat(ctx) {
     return ctx.reply('This chat has been activated');
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 

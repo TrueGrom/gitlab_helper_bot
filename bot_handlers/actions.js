@@ -14,7 +14,7 @@ async function attachUser(ctx) {
     return ctx.editMessageText(`${ctx.session.attach.message} <b>${gitlabUsername}</b>`, { parse_mode: 'HTML' });
   } catch (e) {
     logger.error(e);
-    return ctx.editMessageText('Error');
+    return ctx.editMessageText('Something went wrong');
   } finally {
     ctx.scene.leave();
   }

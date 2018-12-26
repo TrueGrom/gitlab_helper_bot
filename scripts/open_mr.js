@@ -40,6 +40,10 @@ async function checkNewMergeRequests() {
       logger.warn(`No active group for project ${DEFAULT_PROJECT}`);
       process.exit(0);
     }
+    if (!users.length) {
+      logger.warn(`No active users for project ${DEFAULT_PROJECT}`);
+      process.exit(0);
+    }
     const newMergeRequests = await getNewMergeRequests(users);
     await handleNewMergeRequests(newMergeRequests, users, group);
   } catch (e) {

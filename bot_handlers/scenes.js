@@ -59,37 +59,16 @@ async function attachUserManually(ctx) {
     return ctx.scene.reenter();
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 
-async function attachSelf(ctx) {
-  try {
-    ctx.session.attach = {};
-    const user = await User.findOne({ username: ctx.chat.username });
-    if (user) {
-      ctx.session.attach = { ...ctx.session.attach, reject: 'You are already attached to', member: user.member };
-      return rejectAttachment(ctx);
-    }
-    ctx.session.attach = { ...ctx.session.attach, tgUser: ctx.chat.username, message: 'You has been attached to' };
-    return selectMembers(ctx, 'attachme');
-  } catch (e) {
-    logger.error(e);
-    return ctx.reply('Error');
-  }
-}
 
 const attach = new Scene('attach');
 attach.enter(ctx => ctx.reply('Enter a Telegram username'));
 attach.leave(ctx => delete ctx.session.attach);
 attach.on('message', attachUserManually);
 
-const attachMe = new Scene('attach_me');
-attachMe.leave(ctx => delete ctx.session.attach);
-attachMe.enter(attachSelf);
-
-
 module.exports = {
   attach,
-  attachMe,
 };

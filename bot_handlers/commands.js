@@ -2,32 +2,7 @@ const { DEFAULT_PROJECT } = require('../constants');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
 const Project = require('../schemas/project');
-const Member = require('../schemas/member');
 const logger = require('../logger');
-
-async function start(ctx) {
-  try {
-    if (ctx.isPrivateChat()) {
-      logger.warn(`/start command from  @${ctx.chat.username}`);
-      return ctx.reply('Access can be obtained only from a group');
-    }
-    const group = await Group.findOne({ id: ctx.chat.id });
-    if (!group) {
-      return ctx.reply('');
-    }
-    if (group.users.includes(ctx.from.id)) {
-      return ctx.reply('Access already granted');
-    }
-    group.users.push(ctx.from.id);
-    await group.save();
-    logger.info(`Access has been granted to @${ctx.from.username}`);
-    return ctx.reply(`Access has been granted to @${ctx.from.username}`);
-  } catch (e) {
-    logger.error(e);
-    return ctx.reply('Error');
-  }
-}
-
 
 async function enableNotifications(ctx) {
   try {
@@ -80,23 +55,7 @@ async function deactivateChat(ctx) {
     return ctx.reply('This chat has been deactivated');
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
-  }
-}
-
-async function detachMe(ctx) {
-  try {
-    const user = await User.findOne({ username: ctx.chat.username });
-    if (user) {
-      const { username: gitlabUser } = await Member.findOne({ _id: user.member });
-      await User.deleteOne({ username: ctx.chat.username });
-      logger.warn(`User @${ctx.chat.username} has been detached from ${gitlabUser}`);
-      return ctx.replyWithMarkdown(`You has been detached from *${gitlabUser}*`);
-    }
-    return ctx.reply('You are nor attached');
-  } catch (e) {
-    logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 

@@ -9,7 +9,7 @@ const commands = require('./bot_handlers/commands');
 const scenes = require('./bot_handlers/scenes');
 const actions = require('./bot_handlers/actions');
 const {
-  checkPrivate, checkPrivateAdmin, checkAdminAndGroup, checkGroup,
+  checkPrivate, checkPrivateAdmin, checkAdminAndGroup,
 } = require('./helpers');
 const logger = require('./logger');
 
@@ -18,7 +18,6 @@ const bot = new Telegraf(TELEGRAM_TOKEN);
 const stage = new Stage();
 stage.command('cancel', Stage.leave());
 stage.register(scenes.attach);
-stage.register(scenes.attachMe);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -56,17 +55,12 @@ express.listen(BOT_PORT, () => {
   logger.info(`listening on port ${BOT_PORT}`);
 });
 
-bot.start(commands.start);
 bot.command('attach', context => checkPrivateAdmin(context, ctx => ctx.scene.enter('attach')));
-bot.command('access_me', context => checkGroup(context, ctx => commands.accessMe(ctx)));
-bot.command('attach_me', context => checkPrivate(context, ctx => ctx.scene.enter('attach_me')));
-bot.command('detach_me', context => checkPrivate(context, ctx => commands.detachMe(ctx)));
 bot.command('enable_notifications', context => checkPrivate(context, commands.enableNotifications));
 bot.command('disable_notifications', context => checkPrivate(context, commands.disableNotifications));
 bot.command('activate', context => checkAdminAndGroup(context, ctx => commands.activateChat(ctx)));
 bot.command('deactivate', context => checkAdminAndGroup(context, ctx => commands.deactivateChat(ctx)));
 
 bot.action(/(attach)_([\w+.]+)/, actions.attachUser);
-bot.action(/(attachme)_([\w+.]+)/, actions.attachUser);
 
 bot.telegram.setWebhook(SECRET_LOCATION + SECRET_PATH);

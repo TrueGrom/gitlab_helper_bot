@@ -33,11 +33,7 @@ async function getNewMergeRequests(users) {
 }
 
 async function getActiveApprovers() {
-  return User.find({ active: true, approver: true }).populate('member');
-}
-
-function getAllUsersFromGroups(groups) {
-  return Array.prototype.concat.apply([], groups.map(group => group.users));
+  return User.find({ active: true }).populate('member');
 }
 
 module.exports = {

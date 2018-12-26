@@ -1,5 +1,6 @@
 const Member = require('../schemas/member');
 const User = require('../schemas/user');
+const Group = require('../schemas/group');
 const logger = require('../logger');
 
 async function attachUser(ctx) {
@@ -20,6 +21,18 @@ async function attachUser(ctx) {
   }
 }
 
+async function deactivateChat(ctx) {
+  try {
+    await Group.updateOne({ id: ctx.match[2] }, { $set: { active: false } });
+    logger.warn(`Chat ${ctx.chat.id} has been deactivated`);
+    return ctx.editMessageText('This chat has been deactivated');
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  }
+}
+
 module.exports = {
   attachUser,
+  deactivateChat,
 };

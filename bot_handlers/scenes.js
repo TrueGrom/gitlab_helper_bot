@@ -2,6 +2,7 @@ const Scene = require('telegraf/scenes/base');
 const Markup = require('telegraf/markup');
 const Member = require('../schemas/member');
 const User = require('../schemas/user');
+const Group = require('../schemas/group');
 const { getNotAttachedMembers } = require('../schemas/queries');
 const { findUsername, normalizeTgUsername } = require('../helpers');
 const logger = require('../logger');
@@ -69,6 +70,20 @@ attach.enter(ctx => ctx.reply('Enter a Telegram username'));
 attach.leave(ctx => delete ctx.session.attach);
 attach.on('message', attachUserManually);
 
+const deactivate = new Scene('deactivate');
+deactivate.enter(async (ctx) => {
+  const groups = await Group.find({ active: true });
+  if (groups.length) {
+    return ctx.reply('Active groups:', Markup.inlineKeyboard([
+      ...groups.map(group => Markup.callbackButton(group.title, `deactivate_${group.id}`)),
+    ],
+    { columns: 3 }).extra());
+  }
+  ctx.scene.leave();
+  return ctx.reply('No active groups');
+});
+
 module.exports = {
   attach,
+  deactivate,
 };

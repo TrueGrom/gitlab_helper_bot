@@ -48,20 +48,8 @@ async function activateChat(ctx) {
   }
 }
 
-async function deactivateChat(ctx) {
-  try {
-    await Group.updateOne({ id: ctx.chat.id }, { $set: { active: false } });
-    logger.warn(`Chat ${ctx.chat.id} has been deactivated`);
-    return ctx.reply('This chat has been deactivated');
-  } catch (e) {
-    logger.error(e);
-    return ctx.reportError(e);
-  }
-}
-
 module.exports = {
   enableNotifications,
   disableNotifications,
   activateChat,
-  deactivateChat,
 };

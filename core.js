@@ -12,7 +12,6 @@ const {
   checkPrivate, checkPrivateAdmin, checkAdminAndGroup, checkGroup,
 } = require('./helpers');
 const logger = require('./logger');
-const middlewares = require('./middlewares');
 
 
 const bot = new Telegraf(TELEGRAM_TOKEN);
@@ -22,7 +21,6 @@ stage.register(scenes.attach);
 stage.register(scenes.attachMe);
 
 bot.use(session());
-bot.use(middlewares.access());
 bot.use(stage.middleware());
 express.use(bot.webhookCallback(EXPRESS_PATH));
 bot.catch(err => logger.error(err));

@@ -60,10 +60,8 @@ async function deactivateChat(ctx) {
 }
 
 module.exports = {
-  start,
   enableNotifications,
   disableNotifications,
   activateChat,
   deactivateChat,
-  detachMe,
 };

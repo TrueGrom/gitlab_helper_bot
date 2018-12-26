@@ -41,5 +41,4 @@ module.exports = {
   getGroupByProject,
   getNewMergeRequests,
   getActiveApprovers,
-  getAllUsersFromGroups,
 };

@@ -1,4 +1,5 @@
 const { ADMIN_ID } = require('./constants');
+const User = require('./schemas/user');
 
 function findUsername(text) {
   const match = text.match(/(?:@)(\w+\b)/);
@@ -11,35 +12,38 @@ function normalizeTgUsername(username) {
 
 
 function checkAdmin(ctx, callback) {
-  if (ctx.from.id === ADMIN_ID) {
+  if (ctx.isAdmin()) {
     return callback(ctx);
   }
-  return ctx.reply('No access');
 }
 
 function checkPrivate(ctx, callback) {
   if (ctx.isPrivateChat()) {
     return callback(ctx);
   }
-  return ctx.reply('');
 }
 
 function checkAdminAndGroup(ctx, callback) {
   if (ctx.isGroupChat() && ctx.from.id === ADMIN_ID) {
     return callback(ctx);
   }
-  return ctx.reply('');
 }
 
 function checkGroup(ctx, callback) {
   if (ctx.isGroupChat()) {
     return callback(ctx);
   }
-  return ctx.reply('');
 }
 
 function checkPrivateAdmin(ctx, callback) {
   return checkPrivate(ctx, () => checkAdmin(ctx, callback));
+}
+
+function checkExistentUser(ctx, callback) {
+  const user = User.findOne({ id: ctx.from.id });
+  if (user) {
+    return callback(ctx);
+  }
 }
 
 function compareMergeRequest(userA, userB) {
@@ -55,6 +59,7 @@ function compareMergeRequest(userA, userB) {
 module.exports = {
   findUsername,
   checkAdmin,
+  checkExistentUser,
   checkPrivate,
   checkPrivateAdmin,
   checkAdminAndGroup,

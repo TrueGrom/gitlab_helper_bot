@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  deploy-development:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deploy Over SSH
+          command: ssh $SSH_USER@$SSH_HOST $DEV_DEPLOY_COMMAND
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - deploy-development:
+          filters:
+            branches:
+              only: development

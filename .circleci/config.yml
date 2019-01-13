@@ -6,14 +6,14 @@ jobs:
     steps:
       - run:
           name: Deploy Over SSH
-          command: ssh $SSH_USER@$SSH_HOST $DEV_DEPLOY_COMMAND
+          command: ssh $SSH_USER@$SSH_HOST $DEV_DEPLOY_COMMAND &> /dev/null
   deploy-production:
     machine:
       enabled: true
     steps:
       - run:
           name: Deploy Over SSH (production)
-          command: ssh $SSH_USER_PROD@$SSH_HOST_PROD $PROD_DEPLOY_COMMAND
+          command: ssh $SSH_USER_PROD@$SSH_HOST_PROD $PROD_DEPLOY_COMMAND &> /dev/null
 
 workflows:
   version: 2

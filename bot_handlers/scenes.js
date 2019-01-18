@@ -102,8 +102,27 @@ revoke.enter(async (ctx) => {
   }
 });
 
+const grant = new Scene('grant');
+grant.enter(async (ctx) => {
+  try {
+    const approvers = await User.find({ approver: false });
+    if (approvers.length) {
+      return ctx.reply('Select a developer', Markup.inlineKeyboard([
+        ...approvers.map(user => Markup.callbackButton(user.username, `grant_${user.username}`)),
+      ],
+      { columns: 3 }).extra());
+    }
+    return ctx.reply('All developers are approvers');
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
 module.exports = {
   attach,
   deactivate,
   revoke,
+  grant,
 };

@@ -83,7 +83,27 @@ deactivate.enter(async (ctx) => {
   return ctx.reply('No active groups');
 });
 
+
+const revoke = new Scene('revoke');
+revoke.enter(async (ctx) => {
+  try {
+    const approvers = await User.find({ approver: true });
+    if (approvers.length) {
+      return ctx.reply('Select a developer', Markup.inlineKeyboard([
+        ...approvers.map(user => Markup.callbackButton(user.username, `revoke_${user.username}`)),
+      ],
+      { columns: 3 }).extra());
+    }
+    return ctx.reply('No approvers');
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
 module.exports = {
   attach,
   deactivate,
+  revoke,
 };

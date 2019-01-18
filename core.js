@@ -19,6 +19,7 @@ const stage = new Stage();
 stage.command('cancel', Stage.leave());
 stage.register(scenes.attach);
 stage.register(scenes.deactivate);
+stage.register(scenes.revoke);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -58,6 +59,7 @@ express.listen(BOT_PORT, () => {
 
 bot.command('attach', context => checkPrivateAdmin(context, ctx => ctx.scene.enter('attach')));
 bot.command('deactivate', context => checkPrivateAdmin(context, ctx => ctx.scene.enter('deactivate')));
+bot.command('revoke', context => checkPrivateAdmin(context, ctx => ctx.scene.enter('revoke')));
 
 bot.command('enable_notifications', context => checkPrivate(context, commands.enableNotifications));
 bot.command('disable_notifications', context => checkPrivate(context, commands.disableNotifications));
@@ -66,5 +68,6 @@ bot.command('activate', context => checkAdminAndGroup(context, ctx => commands.a
 
 bot.action(/(attach)_([\w+.]+)/, actions.attachUser);
 bot.action(/(deactivate)_(-\d+)/, actions.deactivateChat);
+bot.action(/(revoke)_(\w+)/, actions.revokeApprover);
 
 bot.telegram.setWebhook(SECRET_LOCATION + SECRET_PATH);

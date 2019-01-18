@@ -32,7 +32,20 @@ async function deactivateChat(ctx) {
   }
 }
 
+async function revokeApprover(ctx) {
+  try {
+    await User.updateOne({ username: ctx.match[2] }, { $set: { approver: false } });
+    return ctx.editMessageText(`Approver has been revoked from ${ctx.match[2]}`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
 module.exports = {
   attachUser,
   deactivateChat,
+  revokeApprover,
 };

@@ -2,17 +2,25 @@
   "name": "mr_bot",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=8.11.4"
+  },
   "dependencies": {
     "express": "^4.16.4",
     "gitlab": "^4.3.0",
-    "mongodb": "^3.1.10",
-    "mongoose": "^5.4.0",
-    "telegraf": "^3.25.5",
-    "winston": "^3.1.0"
+    "lodash": "^4.17.11",
+    "mongodb": "^3.1.13",
+    "mongoose": "^5.4.7",
+    "telegraf": "^3.26.0",
+    "winston": "^3.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.11.0",
+    "eslint": "^5.12.1",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0"
+    "eslint-config-prettier": "^4.0.0",
+    "eslint-plugin-import": "^2.15.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "1.16.1"
   }
 }

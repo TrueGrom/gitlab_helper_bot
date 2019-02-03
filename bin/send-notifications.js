@@ -3,6 +3,7 @@ const Telegram = require("telegraf/telegram");
 const Group = require("../models/group");
 const MergeRequest = require("../models/merge-request");
 const Member = require("../models/member");
+const Message = require("../models/message");
 const logger = require("../logger");
 const { TELEGRAM_TOKEN, DEFAULT_PROJECT } = require("../settings");
 
@@ -32,18 +33,21 @@ async function sendNotifications() {
     Group.getByProject(DEFAULT_PROJECT),
     MergeRequest.getNotNotified()
   ]);
+  const messages = [];
   for (const mergeRequest of notNotifiedMergeRequests) {
     const [author, approvers] = await Promise.all([
       Member.findOne({ id: mergeRequest.getAuthorId() }),
       Member.find({ _id: { $in: mergeRequest.appointed_approvers } })
     ]);
     try {
-      await notifyApprovers(group.id, makeNotifyMessage(author, approvers, mergeRequest));
+      const message = await notifyApprovers(group.id, makeNotifyMessage(author, approvers, mergeRequest));
+      messages.push(message);
       await mergeRequest.markAsNotified();
     } catch (e) {
       logger.error(e);
     }
   }
+  await Message.insertMany(messages);
 }
 
 module.exports = {

@@ -1,4 +1,5 @@
 const Member = require("../models/member");
+const MergeRequest = require("../models/merge-request");
 const Group = require("../models/group");
 const logger = require("../logger");
 
@@ -52,9 +53,29 @@ async function grantApprover(ctx) {
   }
 }
 
+async function myMergeRequests(ctx) {
+  const { username } = ctx.chat;
+  try {
+    const { _id, approver } = await Member.findOne({ tgUsername: `@${username}` });
+    if (!approver) {
+      return ctx.reply("You are not a approver");
+    }
+    const mergeRequests = await MergeRequest.getByMemberId(_id);
+    if (mergeRequests.length) {
+      const message = mergeRequests.reduce((acc, { title, web_url }) => `${acc}${title}\n${web_url}\n\n`, "");
+      return ctx.reply(message, { disable_web_page_preview: true });
+    }
+    return ctx.reply("Relax. No merge requests for you");
+  } catch (e) {
+    logger.error(e);
+    ctx.reportError(e);
+  }
+}
+
 module.exports = {
   attachUser,
   deactivateChat,
   revokeApprover,
-  grantApprover
+  grantApprover,
+  myMergeRequests
 };

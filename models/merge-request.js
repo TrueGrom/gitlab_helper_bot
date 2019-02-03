@@ -108,6 +108,14 @@ MergeRequestSchema.statics.getNotNotified = function() {
   return this.find({ state: "opened", notified: false });
 };
 
+MergeRequestSchema.statics.getByMemberId = function(_id) {
+  return this.aggregate([
+    { $match: { state: "opened" } },
+    { $unwind: "$appointed_approvers" },
+    { $match: { appointed_approvers: { $eq: _id } } }
+  ]);
+};
+
 MergeRequestSchema.methods.markAsNotified = function() {
   this.notified = true;
   return this.save();

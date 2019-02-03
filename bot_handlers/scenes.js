@@ -113,9 +113,28 @@ grant.enter(async ctx => {
   }
 });
 
+const deleteMessages = new Scene("deleteMessages");
+deleteMessages.enter(async ctx => {
+  const groups = await Group.find({ active: true });
+  if (groups.length) {
+    return ctx.reply(
+      "Select group:",
+      Markup.inlineKeyboard(
+        [...groups.map(group => Markup.callbackButton(group.title, `delete_messages_${group.id}`))],
+        {
+          columns: 3
+        }
+      ).extra()
+    );
+  }
+  ctx.scene.leave();
+  return ctx.reply("No active groups");
+});
+
 module.exports = {
   attach,
   deactivate,
   revoke,
-  grant
+  grant,
+  deleteMessages
 };

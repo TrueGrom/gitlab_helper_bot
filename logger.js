@@ -12,7 +12,7 @@ const ERROR_LOGS = path.join(LOGS_DIR, "error.log");
 
 const logger = winston.createLogger({
   level: "info",
-  format: winston.format.simple(),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.File({ filename: COMMON_LOGS }),
     new winston.transports.File({ filename: ERROR_LOGS, level: "error" }),

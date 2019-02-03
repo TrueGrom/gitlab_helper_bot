@@ -11,7 +11,7 @@ async function assignApprovers(newMergeRequests, members) {
   const mergeRequestCount = _.countBy(_.flatten(_.map(appointedApprovers, "appointed_approvers")));
   for (const mergeRequest of newMergeRequests) {
     const author = members.find(({ id }) => mergeRequest.isAuthor(id));
-    const approvers = members.filter(({ id }) => !mergeRequest.isAuthor(id));
+    const approvers = members.filter(({ id, approver }) => !mergeRequest.isAuthor(id) && approver);
     const sortedApprovers = _.sortBy(approvers, ({ _id }) => mergeRequestCount[_id] || 0).slice(
       0,
       author.getApproversCount()
@@ -34,7 +34,7 @@ async function assignApprovers(newMergeRequests, members) {
 }
 
 async function checkNewMergeRequests() {
-  const [members, [group]] = await Promise.all([Member.getApprovers(), Group.getByProject(DEFAULT_PROJECT)]);
+  const [members, [group]] = await Promise.all([Member.getActive(), Group.getByProject(DEFAULT_PROJECT)]);
   if (!group) {
     logger.warn(`No active group for project ${DEFAULT_PROJECT}`);
   }

@@ -1,35 +1,35 @@
-const Scene = require('telegraf/scenes/base');
-const Markup = require('telegraf/markup');
-const Member = require('../schemas/member');
-const User = require('../schemas/user');
-const { getNotAttachedMembers } = require('../schemas/queries');
-const { findUsername, normalizeTgUsername } = require('../helpers');
-const logger = require('../logger');
+const Scene = require("telegraf/scenes/base");
+const Markup = require("telegraf/markup");
+const Member = require("../models/member");
+const Group = require("../models/group");
+const logger = require("../logger");
 
-async function selectMembers(ctx, prefix) {
+async function selectGitlabMember(ctx) {
   try {
-    const members = await getNotAttachedMembers();
+    const members = await Member.getNotAttached();
     if (members.length) {
-      return ctx.reply('GITLAB users:', Markup.inlineKeyboard([
-        ...members.map(member => Markup.callbackButton(member.username, `${prefix}_${member.username}`)),
-      ],
-      { columns: 3 }).extra());
+      return ctx.reply(
+        "GITLAB users:",
+        Markup.inlineKeyboard(
+          [...members.map(member => Markup.callbackButton(member.username, `attach_${member.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
     }
-    return ctx.reply('All users already attached');
+    return ctx.reply("All users already attached");
   } catch (e) {
     logger.error(e);
     ctx.scene.leave();
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 
-async function rejectAttachment(ctx) {
+async function rejectAttachment(ctx, member) {
   try {
-    const [{ username: gitlabUsername }] = await Member.find({ _id: ctx.session.attach.member });
-    return ctx.replyWithMarkdown(`${ctx.session.attach.reject} *${gitlabUsername}*`);
+    return ctx.replyWithHTML(`${member.tgUsername} is already attached to  <b>${member.username}</b>`);
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   } finally {
     ctx.scene.leave();
   }
@@ -37,59 +37,85 @@ async function rejectAttachment(ctx) {
 
 async function attachUserManually(ctx) {
   try {
-    ctx.session.attach = {};
-    const tgUser = findUsername(ctx.message.text);
-    if (tgUser) {
-      const user = await User.findOne({ username: tgUser });
-      if (user) {
-        ctx.session.attach = {
-          ...ctx.session.attach,
-          reject: `${tgUser} is already attached to `,
-          member: user.member,
-        };
-        return rejectAttachment(ctx);
-      }
-      ctx.session.attach = {
-        ...ctx.session.attach,
-        tgUser: normalizeTgUsername(tgUser),
-        message: `${tgUser} has been attached to `,
-      };
-      return selectMembers(ctx, 'attach');
+    const tgUsername = ctx.findUsername();
+    if (tgUsername) {
+      ctx.session.tgUsername = tgUsername;
+      const member = await Member.findOne({ tgUsername });
+      return member ? rejectAttachment(ctx, member) : selectGitlabMember(ctx);
     }
-    return ctx.scene.reenter();
+    return ctx.reply("Enter a valid Telegram username");
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    return ctx.reportError(e);
   }
 }
 
-async function attachSelf(ctx) {
+const attach = new Scene("attach");
+attach.enter(attachUserManually);
+attach.leave(ctx => {
+  ctx.session = null;
+});
+
+const deactivate = new Scene("deactivate");
+deactivate.enter(async ctx => {
+  const groups = await Group.find({ active: true });
+  if (groups.length) {
+    return ctx.reply(
+      "Active groups:",
+      Markup.inlineKeyboard([...groups.map(group => Markup.callbackButton(group.title, `deactivate_${group.id}`))], {
+        columns: 3
+      }).extra()
+    );
+  }
+  ctx.scene.leave();
+  return ctx.reply("No active groups");
+});
+
+const revoke = new Scene("revoke");
+revoke.enter(async ctx => {
   try {
-    ctx.session.attach = {};
-    const user = await User.findOne({ username: ctx.chat.username });
-    if (user) {
-      ctx.session.attach = { ...ctx.session.attach, reject: 'You are already attached to', member: user.member };
-      return rejectAttachment(ctx);
+    const approvers = await Member.getApprovers();
+    if (approvers.length) {
+      return ctx.reply(
+        "Select a developer",
+        Markup.inlineKeyboard(
+          [...approvers.map(member => Markup.callbackButton(member.username, `revoke_${member.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
     }
-    ctx.session.attach = { ...ctx.session.attach, tgUser: ctx.chat.username, message: 'You has been attached to' };
-    return selectMembers(ctx, 'attachme');
+    return ctx.reply("No approvers");
   } catch (e) {
     logger.error(e);
-    return ctx.reply('Error');
+    ctx.scene.leave();
+    return ctx.reportError(e);
   }
-}
+});
 
-const attach = new Scene('attach');
-attach.enter(ctx => ctx.reply('Enter a Telegram username'));
-attach.leave(ctx => delete ctx.session.attach);
-attach.on('message', attachUserManually);
-
-const attachMe = new Scene('attach_me');
-attachMe.leave(ctx => delete ctx.session.attach);
-attachMe.enter(attachSelf);
-
+const grant = new Scene("grant");
+grant.enter(async ctx => {
+  try {
+    const notApprovers = await Member.getNotApprovers();
+    if (notApprovers.length) {
+      return ctx.reply(
+        "Select a developer",
+        Markup.inlineKeyboard(
+          [...notApprovers.map(user => Markup.callbackButton(user.username, `grant_${user.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
+    }
+    return ctx.reply("All developers are approvers");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
 
 module.exports = {
   attach,
-  attachMe,
+  deactivate,
+  revoke,
+  grant
 };

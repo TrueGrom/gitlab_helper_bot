@@ -1,5 +1,5 @@
 {
-  "extends": "airbnb-base",
+  "extends": ["airbnb-base", "plugin:node/recommended", "plugin:prettier/recommended"],
   "rules": {
     "max-len": [
       1,
@@ -10,6 +10,19 @@
       }
     ],
     "no-underscore-dangle": "off",
-    "func-names": "off"
+    "func-names": "off",
+    "consistent-return": "off",
+    "camelcase": "off",
+    "no-param-reassign": [
+      "error",
+      {
+        "props": false
+      }
+    ],
+    "object-curly-newline": "off",
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
+    "no-await-in-loop": "off",
+    "no-process-exit": "off",
+    "no-plusplus": "off"
   }
 }

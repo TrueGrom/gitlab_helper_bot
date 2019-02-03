@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  deploy-development:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deploy Over SSH
+          command: ssh $SSH_USER@$SSH_HOST $DEV_DEPLOY_COMMAND &> /dev/null
+  deploy-production:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deploy Over SSH (production)
+          command: ssh $SSH_USER_PROD@$SSH_HOST_PROD $PROD_DEPLOY_COMMAND &> /dev/null
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - deploy-development:
+          filters:
+            branches:
+              only: development
+      - deploy-production:
+          filters:
+            branches:
+              only: master

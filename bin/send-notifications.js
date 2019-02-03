@@ -10,7 +10,8 @@ const { TELEGRAM_TOKEN, DEFAULT_PROJECT } = require("../settings");
 const telegram = new Telegram(TELEGRAM_TOKEN);
 
 function makeNotifyMessage(author, approvers, mergeRequest) {
-  const approverNames = approvers.map(approver => `${approver.tgUsername}`).join(", ");
+  const approverNames = approvers.map(({ tgUsername }) => `${tgUsername}`).join(", ");
+  const hashTags = approvers.reduce((acc, { tgUsername }) => `${acc} #for_${tgUsername.replace("@", "")}`, "\n#newMR ");
   const {
     author: { name },
     title,
@@ -18,7 +19,7 @@ function makeNotifyMessage(author, approvers, mergeRequest) {
   } = mergeRequest;
   return `${approverNames}\n<b>New merge request from</b> <i>${name}</i> (${
     author.tgUsername
-  })\n${title}\n<a href="${web_url}">${web_url}</a>`;
+  })\n${title}\n<a href="${web_url}">${web_url}</a>\n${hashTags}`;
 }
 
 async function notifyApprovers(groupId, message) {

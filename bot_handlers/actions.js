@@ -1,4 +1,5 @@
 const Member = require("../models/member");
+const Message = require("../models/message");
 const MergeRequest = require("../models/merge-request");
 const Group = require("../models/group");
 const logger = require("../logger");
@@ -72,10 +73,35 @@ async function myMergeRequests(ctx) {
   }
 }
 
+async function deleteAllMessages(ctx) {
+  try {
+    const messages = await Message.getForDeletingByChatId(parseInt(ctx.match[2], 10));
+    if (!messages.length) {
+      return ctx.editMessageText("No messages for this group");
+    }
+    for (const message of messages) {
+      try {
+        await ctx.telegram.deleteMessage(message.chat.id, message.message_id);
+        await message.markAsDeleted();
+      } catch (e) {
+        logger.error(e);
+        await message.setError(e);
+      }
+    }
+    return ctx.editMessageText("All messages has been removed");
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
 module.exports = {
   attachUser,
   deactivateChat,
   revokeApprover,
   grantApprover,
-  myMergeRequests
+  myMergeRequests,
+  deleteAllMessages,
 };

@@ -34,8 +34,8 @@ MemberSchema.statics.getNotApprovers = function() {
   });
 };
 
-MemberSchema.statics.getMemberIds = function() {
-  return this.find({}, { member: 1 });
+MemberSchema.statics.getActive = function() {
+  return this.find({ active: true, tgUsername: { $ne: null } });
 };
 
 MemberSchema.statics.revokeApprover = function(query) {

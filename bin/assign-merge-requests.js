@@ -34,7 +34,7 @@ async function assignApprovers(newMergeRequests, members) {
 }
 
 async function checkNewMergeRequests() {
-  const [members, [group]] = await Promise.all([Member.getApprovers(), Group.getByProject(DEFAULT_PROJECT)]);
+  const [members, [group]] = await Promise.all([Member.getActive(), Group.getByProject(DEFAULT_PROJECT)]);
   if (!group) {
     logger.warn(`No active group for project ${DEFAULT_PROJECT}`);
   }

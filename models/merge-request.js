@@ -1,5 +1,8 @@
 const mongoose = require("../database");
 
+const canBeMerged = "can_be_merged";
+const canNotBeMerged = "cannot_be_merged";
+
 const MergeRequestSchema = new mongoose.Schema({
   appointed_approvers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Member" }],
   notified: { type: Boolean, default: false },
@@ -96,7 +99,8 @@ MergeRequestSchema.statics.getNew = function(members) {
     },
     "author.id": {
       $in: memberIds
-    }
+    },
+    merge_status: canBeMerged
   });
 };
 
@@ -105,7 +109,7 @@ MergeRequestSchema.statics.getAllApprovers = async function() {
 };
 
 MergeRequestSchema.statics.getNotNotified = function() {
-  return this.find({ state: "opened", notified: false });
+  return this.find({ state: "opened", notified: false, merge_status: canBeMerged });
 };
 
 MergeRequestSchema.statics.getByMemberId = function(_id) {

@@ -38,7 +38,9 @@ bot.command("deactivate", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deactiva
 bot.command("revoke", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke"))));
 bot.command("grant", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant"))));
 
-bot.command("activate", onlyAdmin(onlyGroup(ctx => commands.activateChat(ctx))));
+bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));
+
+bot.command("for_me", onlyPrivate(actions.myMergeRequests));
 
 bot.action(new RegExp(`(attach)_(${GITLAB_USERNAME_PATTERN.source})`), actions.attachUser);
 bot.action(new RegExp(`(revoke)_(${GITLAB_USERNAME_PATTERN.source})`), actions.revokeApprover);

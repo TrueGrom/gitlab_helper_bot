@@ -102,7 +102,8 @@ MergeRequestSchema.statics.getNew = function(members) {
     "author.id": {
       $in: memberIds
     },
-    merge_status: canBeMerged
+    merge_status: canBeMerged,
+    exclude: false
   });
 };
 

@@ -3,8 +3,8 @@ const _ = require("lodash");
 const api = require("../api");
 const MergeRequest = require("../models/merge-request");
 const logger = require("../logger");
-const { checkNewMergeRequests } = require("./assign-merge-requests");
-const { sendNotifications } = require("./send-notifications");
+const { checkNewMergeRequests } = require("../utils/assign-merge-requests");
+const { sendNotifications } = require("../utils/send-notifications");
 
 async function updateMergeRequests() {
   const mergeRequestIds = _.keyBy(await MergeRequest.find({}, { iid: 1 }), "iid");

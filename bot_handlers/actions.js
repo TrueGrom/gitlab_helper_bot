@@ -57,11 +57,11 @@ async function grantApprover(ctx) {
 async function myMergeRequests(ctx) {
   const { username } = ctx.chat;
   try {
-    const { _id, approver } = await Member.findOne({ tgUsername: `@${username}` });
-    if (!approver) {
+    const member = await Member.findOne({ tgUsername: `@${username}` });
+    if (!member.approver) {
       return ctx.reply("You are not a approver");
     }
-    const mergeRequests = await MergeRequest.getByMemberId(_id);
+    const mergeRequests = await MergeRequest.getByMember(member);
     if (mergeRequests.length) {
       const message = mergeRequests.reduce((acc, { title, web_url }) => `${acc}${title}\n${web_url}\n\n`, "");
       return ctx.reply(message, { disable_web_page_preview: true });
@@ -103,5 +103,5 @@ module.exports = {
   revokeApprover,
   grantApprover,
   myMergeRequests,
-  deleteAllMessages,
+  deleteAllMessages
 };

@@ -8,6 +8,16 @@ const MergeRequestSchema = new mongoose.Schema({
   notified: { type: Boolean, default: false },
   forNotify: { type: Boolean, default: false },
   exclude: { type: Boolean, default: false },
+  approved_by: [
+    {
+      name: String,
+      username: String,
+      id: Number,
+      state: String,
+      avatar_url: String,
+      web_url: String
+    }
+  ],
   id: Number,
   iid: Number,
   project_id: Number,
@@ -123,6 +133,20 @@ MergeRequestSchema.statics.getByMemberId = function(_id) {
   ]);
 };
 
+MergeRequestSchema.statics.getAssigned = function(memberIds) {
+  return this.find({
+    state: "opened",
+    appointed_approvers: {
+      $ne: []
+    },
+    "author.id": {
+      $in: memberIds
+    },
+    merge_status: canBeMerged,
+    exclude: false
+  });
+};
+
 MergeRequestSchema.methods.markAsNotified = function() {
   this.notified = true;
   return this.save();
@@ -139,6 +163,11 @@ MergeRequestSchema.methods.isAuthor = function(memberId) {
 MergeRequestSchema.methods.appointApprovers = function(...memberObjectIds) {
   this.appointed_approvers = [...memberObjectIds];
   this.forNotify = true;
+  return this.save();
+};
+
+MergeRequestSchema.methods.setApprovals = function(approvals) {
+  this.approved_by = approvals;
   return this.save();
 };
 

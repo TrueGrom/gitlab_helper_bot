@@ -8,6 +8,16 @@ const MergeRequestSchema = new mongoose.Schema({
   notified: { type: Boolean, default: false },
   forNotify: { type: Boolean, default: false },
   exclude: { type: Boolean, default: false },
+  approved_by: [
+    {
+      name: String,
+      username: String,
+      id: Number,
+      state: String,
+      avatar_url: String,
+      web_url: String
+    }
+  ],
   id: Number,
   iid: Number,
   project_id: Number,
@@ -102,7 +112,8 @@ MergeRequestSchema.statics.getNew = function(members) {
     "author.id": {
       $in: memberIds
     },
-    merge_status: canBeMerged
+    merge_status: canBeMerged,
+    exclude: false
   });
 };
 
@@ -114,12 +125,28 @@ MergeRequestSchema.statics.getNotNotified = function() {
   return this.find({ state: "opened", forNotify: true, notified: false, merge_status: canBeMerged, exclude: false });
 };
 
-MergeRequestSchema.statics.getByMemberId = function(_id) {
+MergeRequestSchema.statics.getByMember = function({ _id, id }) {
   return this.aggregate([
     { $match: { state: "opened" } },
     { $unwind: "$appointed_approvers" },
-    { $match: { appointed_approvers: { $eq: _id } } }
+    { $match: { appointed_approvers: { $eq: _id } } },
+    { $unwind: { path: "$approved_by", preserveNullAndEmptyArrays: true } },
+    { $match: { "approved_by.id": { $ne: id } } }
   ]);
+};
+
+MergeRequestSchema.statics.getAssigned = function(memberIds) {
+  return this.find({
+    state: "opened",
+    appointed_approvers: {
+      $ne: []
+    },
+    "author.id": {
+      $in: memberIds
+    },
+    merge_status: canBeMerged,
+    exclude: false
+  });
 };
 
 MergeRequestSchema.methods.markAsNotified = function() {
@@ -138,6 +165,11 @@ MergeRequestSchema.methods.isAuthor = function(memberId) {
 MergeRequestSchema.methods.appointApprovers = function(...memberObjectIds) {
   this.appointed_approvers = [...memberObjectIds];
   this.forNotify = true;
+  return this.save();
+};
+
+MergeRequestSchema.methods.setApprovals = function(approvals) {
+  this.approved_by = approvals;
   return this.save();
 };
 

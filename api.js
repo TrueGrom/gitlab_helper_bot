@@ -18,6 +18,10 @@ class Api {
   getProjectMembers({ state = "active" } = {}) {
     return this._api.ProjectMembers.all(this._projectId, { state });
   }
+
+  getMergeRequestApprovals(iid) {
+    return this._api.MergeRequests.approvals(this._projectId, { mergerequestId: iid });
+  }
 }
 
 const api = new Api({ token: GITLAB_TOKEN, projectId: DEFAULT_PROJECT });

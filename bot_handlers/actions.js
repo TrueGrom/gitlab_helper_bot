@@ -61,7 +61,7 @@ async function myMergeRequests(ctx) {
     if (!member.approver) {
       return ctx.reply("You are not a approver");
     }
-    const mergeRequests = await MergeRequest.getByMember(member);
+    const mergeRequests = await MergeRequest.getNotApprovedByMember(member);
     if (mergeRequests.length) {
       const message = mergeRequests.reduce((acc, { title, web_url }) => `${acc}${title}\n${web_url}\n\n`, "");
       return ctx.reply(message, { disable_web_page_preview: true });

@@ -125,14 +125,12 @@ MergeRequestSchema.statics.getNotNotified = function() {
   return this.find({ state: "opened", forNotify: true, notified: false, merge_status: canBeMerged, exclude: false });
 };
 
-MergeRequestSchema.statics.getByMember = function({ _id, id }) {
-  return this.aggregate([
-    { $match: { state: "opened" } },
-    { $unwind: "$appointed_approvers" },
-    { $match: { appointed_approvers: { $eq: _id } } },
-    { $unwind: { path: "$approved_by", preserveNullAndEmptyArrays: true } },
-    { $match: { "approved_by.id": { $ne: id } } }
-  ]);
+MergeRequestSchema.statics.getNotApprovedByMember = function({ _id, id }) {
+  return this.find({
+    state: "opened",
+    appointed_approvers: _id,
+    "approved_by.id": { $ne: id }
+  });
 };
 
 MergeRequestSchema.statics.getAssigned = function(memberIds) {

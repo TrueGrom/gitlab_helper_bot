@@ -15,7 +15,8 @@ const MemberSchema = new mongoose.Schema({
   tgLastName: String,
   approver: { type: Boolean, default: false },
   approversCount: { type: Number, default: 2 },
-  active: { type: Boolean, default: true }
+  active: { type: Boolean, default: true },
+  notifications: { type: Boolean, default: false }
 });
 
 MemberSchema.statics.getNotAttached = function() {
@@ -59,14 +60,21 @@ MemberSchema.methods.getApproversCount = function() {
 };
 
 MemberSchema.methods.setTelegramInfo = function({ id, username, first_name, last_name }) {
-  return this.update({
-    $set: {
-      tgId: id,
-      tgUsername: username,
-      tgFirstName: first_name,
-      tgLastName: last_name
-    }
-  });
+  this.tgId = id;
+  this.tgUsername = username;
+  this.tgFirstName = first_name;
+  this.tgLastName = last_name;
+  return this.save();
+};
+
+MemberSchema.methods.enableNotifications = function() {
+  this.notifications = true;
+  return this.save();
+};
+
+MemberSchema.methods.disableNotifications = function() {
+  this.notifications = false;
+  return this.save();
 };
 
 MemberSchema.index({ id: 1 }, { unique: true });

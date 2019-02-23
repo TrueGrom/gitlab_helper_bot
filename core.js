@@ -41,6 +41,8 @@ bot.command("grant", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant"))));
 bot.command("delete_all_messages", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deleteMessages"))));
 
 bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));
+bot.command("enable_notifications", onlyPrivate(commands.enableNotifications));
+bot.command("disable_notifications", onlyPrivate(commands.disableNotifications));
 
 bot.command("for_me", onlyPrivate(actions.myMergeRequests));
 

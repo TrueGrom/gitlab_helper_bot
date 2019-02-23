@@ -57,7 +57,7 @@ async function grantApprover(ctx) {
 async function myMergeRequests(ctx) {
   const { username } = ctx.chat;
   try {
-    const member = await Member.findOne({ tgUsername: `@${username}` });
+    const member = await Member.findOne({ tgUsername: `${username}` });
     if (!member.approver) {
       return ctx.reply("You are not a approver");
     }

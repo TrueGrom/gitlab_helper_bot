@@ -28,7 +28,7 @@ function extendBot(bot) {
 
   bot.context.findUsername = function() {
     const match = this.message.text.match(TELEGRAM_USERNAME_PATTERN);
-    return match ? match[0] : null;
+    return match ? match[1] : null;
   };
 }
 

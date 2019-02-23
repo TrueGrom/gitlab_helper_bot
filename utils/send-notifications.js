@@ -9,6 +9,10 @@ const { TELEGRAM_TOKEN, DEFAULT_PROJECT } = require("../settings");
 
 const telegram = new Telegram(TELEGRAM_TOKEN);
 
+function makeProblemMessage({ title, web_url }) {
+  return `Your merge request <b>can not be merged!</b>\n${title}\n<a href="${web_url}">${web_url}</a>`;
+}
+
 function makeNotifyMessage(author, approvers, mergeRequest) {
   const approverNames = approvers.map(({ tgUsername }) => `${tgUsername}`).join(", ");
   const hashTags = approvers.reduce((acc, { tgUsername }) => `${acc} #for_${tgUsername.replace("@", "")}`, "\n#newMR ");
@@ -24,6 +28,13 @@ function makeNotifyMessage(author, approvers, mergeRequest) {
 
 async function notifyApprovers(groupId, message) {
   return telegram.sendMessage(groupId, message, {
+    parse_mode: "HTML",
+    disable_web_page_preview: true
+  });
+}
+
+async function notifyMember(id, message) {
+  return telegram.sendMessage(id, message, {
     parse_mode: "HTML",
     disable_web_page_preview: true
   });
@@ -52,5 +63,7 @@ async function sendNotifications() {
 }
 
 module.exports = {
-  sendNotifications
+  sendNotifications,
+  notifyMember,
+  makeProblemMessage
 };

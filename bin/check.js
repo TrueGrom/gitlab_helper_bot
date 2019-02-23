@@ -6,6 +6,7 @@ const logger = require("../logger");
 const { checkNewMergeRequests } = require("../utils/assign-merge-requests");
 const { sendNotifications } = require("../utils/send-notifications");
 const { updateApprovals } = require("../utils/approvals");
+const { reportProblems } = require("../utils/merging-problems");
 
 async function updateMergeRequests() {
   const mergeRequestIds = _.keyBy(await MergeRequest.find({}, { iid: 1 }), "iid");
@@ -32,6 +33,7 @@ updateMergeRequests()
   })
   .then(updateApprovals)
   .then(sendNotifications)
+  .then(reportProblems)
   .then(() => process.exit(0))
   .catch(e => {
     logger.error(e);

@@ -14,8 +14,8 @@ function makeProblemMessage({ title, web_url }) {
 }
 
 function makeNotifyMessage(author, approvers, mergeRequest) {
-  const approverNames = approvers.map(({ tgUsername }) => `${tgUsername}`).join(", ");
-  const hashTags = approvers.reduce((acc, { tgUsername }) => `${acc} #for_${tgUsername.replace("@", "")}`, "\n#newMR ");
+  const approverNames = approvers.map(({ tgUsername }) => `@${tgUsername}`).join(", ");
+  const hashTags = approvers.reduce((acc, { tgUsername }) => `${acc} #for_${tgUsername}`, "\n#newMR ");
   const {
     author: { name },
     title,

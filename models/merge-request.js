@@ -9,6 +9,7 @@ const MergeRequestSchema = new mongoose.Schema({
   forNotify: { type: Boolean, default: false },
   exclude: { type: Boolean, default: false },
   problemsNotified: { type: Boolean, default: false },
+  approvalNotified: { type: Boolean, default: false },
   approved_by: [
     {
       name: String,
@@ -181,6 +182,11 @@ MergeRequestSchema.methods.markAsNotified = function() {
 
 MergeRequestSchema.methods.markProblemAsNotified = function() {
   this.problemsNotified = true;
+  return this.save();
+};
+
+MergeRequestSchema.methods.markApprovalAsNotified = function() {
+  this.approvalNotified = true;
   return this.save();
 };
 

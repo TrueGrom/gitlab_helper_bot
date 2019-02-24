@@ -9,6 +9,15 @@ const { TELEGRAM_TOKEN, DEFAULT_PROJECT } = require("../settings");
 
 const telegram = new Telegram(TELEGRAM_TOKEN);
 
+function makeApprovalMessage({ title, web_url }, usernames, reply) {
+  const hashTags = "#approved";
+  const mention = usernames.reduce((acc, username) => `${acc}@${username} `, "");
+  if (reply) {
+    return `${mention} <b>Merge request approved</b>\n\n${hashTags}`;
+  }
+  return `${mention} <b>Merge request approved</b>\n${title}\n<a href="${web_url}">${web_url}</a>\n\n${hashTags}`;
+}
+
 function makeProblemMessage({ title, web_url }) {
   return `Your merge request <b>can not be merged!</b>\n${title}\n<a href="${web_url}">${web_url}</a>`;
 }
@@ -26,11 +35,15 @@ function makeNotifyMessage(author, approvers, mergeRequest) {
   })\n${title}\n<a href="${web_url}">${web_url}</a>\n${hashTags}`;
 }
 
-async function notifyApprovers(groupId, message) {
-  return telegram.sendMessage(groupId, message, {
+async function notifyGroup(groupId, message, replyTo) {
+  const extra = {
     parse_mode: "HTML",
     disable_web_page_preview: true
-  });
+  };
+  if (replyTo) {
+    extra.reply_to_message_id = replyTo;
+  }
+  return telegram.sendMessage(groupId, message, extra);
 }
 
 async function notifyMember(id, message) {
@@ -52,7 +65,7 @@ async function sendNotifications() {
       Member.find({ _id: { $in: mergeRequest.appointed_approvers } })
     ]);
     try {
-      const message = await notifyApprovers(group.id, makeNotifyMessage(author, approvers, mergeRequest));
+      const message = await notifyGroup(group.id, makeNotifyMessage(author, approvers, mergeRequest));
       messages.push(message);
       await mergeRequest.markAsNotified();
     } catch (e) {
@@ -65,5 +78,7 @@ async function sendNotifications() {
 module.exports = {
   sendNotifications,
   notifyMember,
-  makeProblemMessage
+  notifyGroup,
+  makeProblemMessage,
+  makeApprovalMessage
 };

@@ -21,6 +21,8 @@ stage.register(scenes.deactivate);
 stage.register(scenes.revoke);
 stage.register(scenes.grant);
 stage.register(scenes.deleteMessages);
+stage.register(scenes.grantProductManager);
+stage.register(scenes.revokeProductManager);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -38,6 +40,8 @@ bot.command("attach", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("attach"))));
 bot.command("deactivate", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deactivate"))));
 bot.command("revoke", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke"))));
 bot.command("grant", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant"))));
+bot.command("grant_pm", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant_pm"))));
+bot.command("revoke_pm", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke_pm"))));
 bot.command("delete_all_messages", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deleteMessages"))));
 
 bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));
@@ -49,6 +53,14 @@ bot.command("for_me", onlyPrivate(actions.myMergeRequests));
 bot.action(new RegExp(`(attach)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.attachUser)));
 bot.action(new RegExp(`(revoke)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.revokeApprover)));
 bot.action(new RegExp(`(grant)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.grantApprover)));
+bot.action(
+  new RegExp(`(grantpm)_(${GITLAB_USERNAME_PATTERN.source})`),
+  onlyAdmin(onlyPrivate(actions.grantProductManager))
+);
+bot.action(
+  new RegExp(`(revokepm)_(${GITLAB_USERNAME_PATTERN.source})`),
+  onlyAdmin(onlyPrivate(actions.revokeProductManager))
+);
 bot.action(/(delete_messages)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deleteAllMessages)));
 bot.action(/(deactivate)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deactivateChat)));
 

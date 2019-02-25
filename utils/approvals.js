@@ -15,7 +15,7 @@ async function checkSuccessfulApprovals(assignedMergeRequest, members) {
     const approvers = members.filter(({ _id }) => mergeRequest.appointed_approvers.includes(_id));
     const approversIds = approvers.map(({ id }) => id);
     const approvals = mergeRequest.approved_by.map(({ id }) => id);
-    if (approvers.length >= author.approversCount && approversIds.every(id => approvals.includes(id))) {
+    if (approvals.length >= author.approversCount && approversIds.every(id => approvals.includes(id))) {
       try {
         const message = await Message.findByUrl(mergeRequest.web_url);
         if (message) {
@@ -25,6 +25,9 @@ async function checkSuccessfulApprovals(assignedMergeRequest, members) {
           const [group] = await Group.getByProject(DEFAULT_PROJECT);
           const messageBody = makeApprovalMessage(mergeRequest, managersUsername);
           await notifyGroup(group.id, messageBody);
+        }
+        if (managers.length) {
+          await api.assignMergeRequest(mergeRequest.iid, managers[0].id);
         }
         await mergeRequest.markApprovalAsNotified();
       } catch (e) {

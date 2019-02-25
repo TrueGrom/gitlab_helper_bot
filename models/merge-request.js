@@ -101,7 +101,7 @@ const MergeRequestSchema = new mongoose.Schema({
     human_total_time_spent: Number
   },
   squash: Boolean,
-  approvals_before_merge: Boolean
+  approvals_before_merge: String
 });
 
 MergeRequestSchema.statics.getNew = function(members) {
@@ -162,7 +162,7 @@ MergeRequestSchema.statics.getCanNotBeMerged = function(memberIds) {
 };
 
 MergeRequestSchema.statics.updateProblemStatuses = function() {
-  return this.update(
+  return this.updateMany(
     {
       state: "opened",
       merge_status: canBeMerged

@@ -113,6 +113,48 @@ grant.enter(async ctx => {
   }
 });
 
+const grantProductManager = new Scene("grant_pm");
+grantProductManager.enter(async ctx => {
+  try {
+    const notManagers = await Member.getNotManagers();
+    if (notManagers.length) {
+      return ctx.reply(
+        "Select a user",
+        Markup.inlineKeyboard(
+          [...notManagers.map(user => Markup.callbackButton(user.username, `grantpm_${user.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
+    }
+    return ctx.reply("All developers are product managers. WTF?");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
+const revokeProductManager = new Scene("revoke_pm");
+revokeProductManager.enter(async ctx => {
+  try {
+    const managers = await Member.getManagers();
+    if (managers.length) {
+      return ctx.reply(
+        "Select a user",
+        Markup.inlineKeyboard(
+          [...managers.map(user => Markup.callbackButton(user.username, `revokepm_${user.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
+    }
+    return ctx.reply("No managers");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
 const deleteMessages = new Scene("deleteMessages");
 deleteMessages.enter(async ctx => {
   const groups = await Group.find({ active: true });
@@ -136,5 +178,7 @@ module.exports = {
   deactivate,
   revoke,
   grant,
-  deleteMessages
+  deleteMessages,
+  grantProductManager,
+  revokeProductManager
 };

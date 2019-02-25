@@ -54,6 +54,30 @@ async function grantApprover(ctx) {
   }
 }
 
+async function grantProductManager(ctx) {
+  try {
+    await Member.grantProductManager({ username: ctx.match[2] });
+    return ctx.editMessageText(`Product manager has been granted to ${ctx.match[2]}`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
+async function revokeProductManager(ctx) {
+  try {
+    await Member.revokeProductManager({ username: ctx.match[2] });
+    return ctx.editMessageText(`Product manager has been revoked from ${ctx.match[2]}`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
 async function myMergeRequests(ctx) {
   const { username } = ctx.chat;
   try {
@@ -103,5 +127,7 @@ module.exports = {
   revokeApprover,
   grantApprover,
   myMergeRequests,
-  deleteAllMessages
+  deleteAllMessages,
+  grantProductManager,
+  revokeProductManager
 };

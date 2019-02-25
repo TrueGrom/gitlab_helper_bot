@@ -2,6 +2,40 @@ const api = require("../api");
 const logger = require("../logger");
 const MergeRequest = require("../models/merge-request");
 const Member = require("../models/member");
+const Message = require("../models/message");
+const Group = require("../models/group");
+const { DEFAULT_PROJECT } = require("../settings");
+const { notifyGroup, makeApprovalMessage } = require("../utils/send-notifications");
+
+async function checkSuccessfulApprovals(assignedMergeRequest, members) {
+  const managers = members.filter(({ productManager }) => productManager);
+  const managersUsername = managers.map(({ tgUsername }) => tgUsername);
+  for (const mergeRequest of assignedMergeRequest) {
+    const author = members.find(({ id }) => mergeRequest.isAuthor(id));
+    const approvers = members.filter(({ _id }) => mergeRequest.appointed_approvers.includes(_id));
+    const approversIds = approvers.map(({ id }) => id);
+    const approvals = mergeRequest.approved_by.map(({ id }) => id);
+    if (approvals.length >= author.approversCount && approversIds.every(id => approvals.includes(id))) {
+      try {
+        const message = await Message.findByUrl(mergeRequest.web_url);
+        if (message) {
+          const replyBody = makeApprovalMessage(mergeRequest, managersUsername, true);
+          await notifyGroup(message.chat.id, replyBody, message.message_id);
+        } else {
+          const [group] = await Group.getByProject(DEFAULT_PROJECT);
+          const messageBody = makeApprovalMessage(mergeRequest, managersUsername);
+          await notifyGroup(group.id, messageBody);
+        }
+        if (managers.length) {
+          await api.assignMergeRequest(mergeRequest.iid, managers[0].id);
+        }
+        await mergeRequest.markApprovalAsNotified();
+      } catch (e) {
+        logger.error(e);
+      }
+    }
+  }
+}
 
 async function updateApprovals() {
   try {
@@ -16,6 +50,8 @@ async function updateApprovals() {
         logger.error(e);
       }
     }
+    const notNotified = assignedMergeRequests.filter(({ approvalNotified }) => !approvalNotified);
+    await checkSuccessfulApprovals(notNotified, members);
   } catch (e) {
     logger.error(e);
   }

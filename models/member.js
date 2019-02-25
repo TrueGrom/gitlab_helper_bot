@@ -16,7 +16,8 @@ const MemberSchema = new mongoose.Schema({
   approver: { type: Boolean, default: false },
   approversCount: { type: Number, default: 2 },
   active: { type: Boolean, default: true },
-  notifications: { type: Boolean, default: false }
+  notifications: { type: Boolean, default: false },
+  productManager: { type: Boolean, default: false }
 });
 
 MemberSchema.statics.getNotAttached = function() {
@@ -31,6 +32,22 @@ MemberSchema.statics.getNotApprovers = function() {
   return this.find({
     active: true,
     approver: false,
+    tgUsername: { $ne: null }
+  });
+};
+
+MemberSchema.statics.getNotManagers = function() {
+  return this.find({
+    active: true,
+    productManager: false,
+    tgUsername: { $ne: null }
+  });
+};
+
+MemberSchema.statics.getManagers = function() {
+  return this.find({
+    active: true,
+    productManager: true,
     tgUsername: { $ne: null }
   });
 };
@@ -51,6 +68,22 @@ MemberSchema.statics.grantApprover = function(query) {
   return this.updateOne(query, {
     $set: {
       approver: true
+    }
+  });
+};
+
+MemberSchema.statics.grantProductManager = function(query) {
+  return this.updateOne(query, {
+    $set: {
+      productManager: true
+    }
+  });
+};
+
+MemberSchema.statics.revokeProductManager = function(query) {
+  return this.updateOne(query, {
+    $set: {
+      productManager: false
     }
   });
 };

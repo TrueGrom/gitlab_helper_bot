@@ -22,6 +22,10 @@ class Api {
   getMergeRequestApprovals(iid) {
     return this._api.MergeRequests.approvals(this._projectId, { mergerequestId: iid });
   }
+
+  assignMergeRequest(iid, userId) {
+    return this._api.MergeRequests.edit(this._projectId, iid, { assignee_id: userId });
+  }
 }
 
 const api = new Api({ token: GITLAB_TOKEN, projectId: DEFAULT_PROJECT });

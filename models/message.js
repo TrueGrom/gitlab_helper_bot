@@ -19,6 +19,10 @@ MessageSchema.statics.getForDeletingByChatId = function(chatId) {
   return this.find({ "chat.id": chatId, date: { $gt: unixTime }, deleted: false, error: false });
 };
 
+MessageSchema.statics.findByUrl = function(url) {
+  return this.findOne({ "entities.url": url, deleted: false, error: false });
+};
+
 MessageSchema.methods.markAsDeleted = function() {
   this.deleted = true;
   return this.save();
@@ -30,6 +34,7 @@ MessageSchema.methods.setError = function(error) {
   return this.save();
 };
 
+MessageSchema.index({ text: "text" });
 const model = mongoose.model("Message", MessageSchema);
 
 module.exports = model;

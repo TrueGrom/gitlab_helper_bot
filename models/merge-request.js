@@ -9,6 +9,7 @@ const MergeRequestSchema = new mongoose.Schema({
   forNotify: { type: Boolean, default: false },
   exclude: { type: Boolean, default: false },
   problemsNotified: { type: Boolean, default: false },
+  approvalNotified: { type: Boolean, default: false },
   approved_by: [
     {
       name: String,
@@ -100,7 +101,7 @@ const MergeRequestSchema = new mongoose.Schema({
     human_total_time_spent: Number
   },
   squash: Boolean,
-  approvals_before_merge: Boolean
+  approvals_before_merge: String
 });
 
 MergeRequestSchema.statics.getNew = function(members) {
@@ -161,7 +162,7 @@ MergeRequestSchema.statics.getCanNotBeMerged = function(memberIds) {
 };
 
 MergeRequestSchema.statics.updateProblemStatuses = function() {
-  return this.update(
+  return this.updateMany(
     {
       state: "opened",
       merge_status: canBeMerged
@@ -181,6 +182,11 @@ MergeRequestSchema.methods.markAsNotified = function() {
 
 MergeRequestSchema.methods.markProblemAsNotified = function() {
   this.problemsNotified = true;
+  return this.save();
+};
+
+MergeRequestSchema.methods.markApprovalAsNotified = function() {
+  this.approvalNotified = true;
   return this.save();
 };
 

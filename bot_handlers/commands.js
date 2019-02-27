@@ -39,7 +39,7 @@ async function enableNotifications(ctx) {
       return ctx.reply("Notifications already enabled");
     }
     await member.enableNotifications();
-    return ctx.reply("Notifications has been enabled");
+    return ctx.reply("Notifications have been enabled");
   } catch (e) {
     logger.error(e);
     return ctx.reportError(e);
@@ -54,7 +54,7 @@ async function disableNotifications(ctx) {
       return ctx.reply("Notifications already disabled");
     }
     await member.disableNotifications();
-    return ctx.reply("Notifications has been disabled");
+    return ctx.reply("Notifications have been disabled");
   } catch (e) {
     logger.error(e);
     return ctx.reportError(e);

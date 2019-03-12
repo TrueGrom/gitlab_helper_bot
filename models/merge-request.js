@@ -120,7 +120,7 @@ MergeRequestSchema.statics.getNew = function(members) {
 };
 
 MergeRequestSchema.statics.getAllApprovers = async function() {
-  return this.find({ appointed_approvers: { $ne: [] } }, { appointed_approvers: 1 });
+  return this.find({ state: "opened", appointed_approvers: { $ne: [] } }, { appointed_approvers: 1 });
 };
 
 MergeRequestSchema.statics.getNotNotified = function() {

@@ -26,6 +26,10 @@ class Api {
   assignMergeRequest(iid, userId) {
     return this._api.MergeRequests.edit(this._projectId, iid, { assignee_id: userId });
   }
+
+  getAwardEmojis(iid) {
+    return this._api.MergeRequestAwardEmojis.all(this._projectId, iid);
+  }
 }
 
 const api = new Api({ token: GITLAB_TOKEN, projectId: DEFAULT_PROJECT });

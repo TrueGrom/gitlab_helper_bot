@@ -20,6 +20,24 @@ const MergeRequestSchema = new mongoose.Schema({
       web_url: String
     }
   ],
+  emojis: [
+    {
+      id: Number,
+      name: String,
+      user: {
+        id: Number,
+        name: String,
+        username: String,
+        state: String,
+        avatar_url: String,
+        web_url: String
+      },
+      created_at: Date,
+      updated_at: Date,
+      awardable_id: Number,
+      awardable_type: String
+    }
+  ],
   id: Number,
   iid: Number,
   project_id: Number,
@@ -206,6 +224,11 @@ MergeRequestSchema.methods.appointApprovers = function(...memberObjectIds) {
 
 MergeRequestSchema.methods.setApprovals = function(approvals) {
   this.approved_by = approvals;
+  return this.save();
+};
+
+MergeRequestSchema.methods.setEmojis = function(emojis) {
+  this.emojis = emojis;
   return this.save();
 };
 

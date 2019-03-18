@@ -1,23 +1,15 @@
 const fs = require("fs");
 const path = require("path");
-const winston = require("winston");
+const pinoms = require("pino-multi-stream");
 const { LOGS_DIR } = require("./settings");
 
 if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR);
 }
 
-const COMMON_LOGS = path.join(LOGS_DIR, "common.log");
-const ERROR_LOGS = path.join(LOGS_DIR, "error.log");
+const LOGS = path.join(LOGS_DIR, "common.log");
+const streams = [{ stream: process.stdout }, { stream: fs.createWriteStream(LOGS) }];
 
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-  transports: [
-    new winston.transports.File({ filename: COMMON_LOGS }),
-    new winston.transports.File({ filename: ERROR_LOGS, level: "error" }),
-    new winston.transports.Console()
-  ]
-});
+const logger = pinoms({ streams });
 
 module.exports = logger;

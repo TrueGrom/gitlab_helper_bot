@@ -11,8 +11,9 @@
     "lodash": "^4.17.11",
     "mongodb": "^3.1.13",
     "mongoose": "^5.4.7",
-    "telegraf": "^3.26.0",
-    "winston": "^3.2.0"
+    "pino": "^5.11.1",
+    "pino-multi-stream": "^4.0.2",
+    "telegraf": "^3.26.0"
   },
   "devDependencies": {
     "eslint": "^5.12.1",

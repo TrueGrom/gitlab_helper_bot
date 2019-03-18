@@ -7,15 +7,26 @@ const Group = require("../models/group");
 const { DEFAULT_PROJECT } = require("../settings");
 const { notifyGroup, makeApprovalMessage } = require("../utils/send-notifications");
 
+const THUMBSUP = "thumbsup";
+const EMOJI_TYPE = "MergeRequest";
+
+function filterEmojis(mergeRequest) {
+  return mergeRequest.emojis.filter(({ name, awardable_type }) => name === THUMBSUP && awardable_type === EMOJI_TYPE);
+}
+
 async function checkSuccessfulApprovals(assignedMergeRequest, members) {
   const managers = members.filter(({ productManager }) => productManager);
   const managersUsername = managers.map(({ tgUsername }) => tgUsername);
   for (const mergeRequest of assignedMergeRequest) {
-    const author = members.find(({ id }) => mergeRequest.isAuthor(id));
-    const approvers = members.filter(({ _id }) => mergeRequest.appointed_approvers.includes(_id));
-    const approversIds = approvers.map(({ id }) => id);
+    const { approversCount } = members.find(({ id }) => mergeRequest.isAuthor(id));
+    const assigned = members.filter(({ _id }) => mergeRequest.appointed_approvers.includes(_id)).map(({ id }) => id);
     const approvals = mergeRequest.approved_by.map(({ id }) => id);
-    if (approvals.length >= author.approversCount && approversIds.every(id => approvals.includes(id))) {
+    const emojiApprovals = filterEmojis(mergeRequest)
+      .filter(({ user: { id } }) => assigned.includes(id))
+      .map(({ user: { id } }) => id);
+    const approved = approvals.length >= approversCount && assigned.every(id => approvals.includes(id));
+    const emojiApproved = emojiApprovals.length >= approversCount && assigned.every(id => emojiApprovals.includes(id));
+    if (approved || emojiApproved) {
       try {
         const message = await Message.findByUrl(mergeRequest.web_url);
         if (message) {
@@ -26,10 +37,10 @@ async function checkSuccessfulApprovals(assignedMergeRequest, members) {
           const messageBody = makeApprovalMessage(mergeRequest, managersUsername);
           await notifyGroup(group.id, messageBody);
         }
+        await mergeRequest.markApprovalAsNotified();
         if (managers.length) {
           await api.assignMergeRequest(mergeRequest.iid, managers[0].id);
         }
-        await mergeRequest.markApprovalAsNotified();
       } catch (e) {
         logger.error(e);
       }
@@ -46,6 +57,15 @@ async function updateApprovals() {
       try {
         const mergeRequest = assignedMergeRequests.find(({ iid }) => approval.iid === iid);
         await mergeRequest.setApprovals(approval.approved_by.map(({ user }) => user));
+      } catch (e) {
+        logger.error(e);
+      }
+    }
+    const allEmojis = await Promise.all(assignedMergeRequests.map(({ iid }) => api.getAwardEmojis(iid)));
+    for (const [index, emoji] of allEmojis.entries()) {
+      try {
+        const mergeRequest = assignedMergeRequests[index];
+        await mergeRequest.setEmojis(emoji);
       } catch (e) {
         logger.error(e);
       }

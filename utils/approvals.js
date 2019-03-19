@@ -19,7 +19,7 @@ async function checkSuccessfulApprovals(assignedMergeRequest, members) {
   const managersUsername = managers.map(({ tgUsername }) => tgUsername);
   for (const mergeRequest of assignedMergeRequest) {
     const { approversCount } = members.find(({ id }) => mergeRequest.isAuthor(id));
-    const assigned = members.filter(({ _id }) => mergeRequest.appointed_approvers.includes(_id)).map(({ id }) => id);
+    const assigned = members.filter(({ _id }) => mergeRequest.hasApprover(_id)).map(({ id }) => id);
     const approvals = mergeRequest.approved_by.map(({ id }) => id);
     const emojiApprovals = filterEmojis(mergeRequest)
       .filter(({ user: { id } }) => assigned.includes(id))

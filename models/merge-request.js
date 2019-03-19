@@ -38,6 +38,15 @@ const MergeRequestSchema = new mongoose.Schema({
       awardable_type: String
     }
   ],
+  pipelines: [
+    {
+      id: Number,
+      sha: String,
+      ref: String,
+      status: String,
+      web_url: String
+    }
+  ],
   id: Number,
   iid: Number,
   project_id: Number,
@@ -141,6 +150,10 @@ MergeRequestSchema.statics.getAllApprovers = async function() {
   return this.find({ state: "opened", appointed_approvers: { $ne: [] } }, { appointed_approvers: 1 });
 };
 
+MergeRequestSchema.statics.getOpened = function() {
+  return this.find({ state: "opened", exclude: false });
+};
+
 MergeRequestSchema.statics.getNotNotified = function() {
   return this.find({ state: "opened", forNotify: true, notified: false, merge_status: canBeMerged, exclude: false });
 };
@@ -154,9 +167,10 @@ MergeRequestSchema.statics.getNotApprovedByMember = function({ _id, id }) {
   });
 };
 
-MergeRequestSchema.statics.getAssigned = function(memberIds) {
+MergeRequestSchema.statics.getAssignedNotNotified = function(memberIds) {
   return this.find({
     state: "opened",
+    approvalNotified: false,
     appointed_approvers: {
       $ne: []
     },
@@ -230,6 +244,11 @@ MergeRequestSchema.methods.setApprovals = function(approvals) {
 
 MergeRequestSchema.methods.setEmojis = function(emojis) {
   this.emojis = emojis;
+  return this.save();
+};
+
+MergeRequestSchema.methods.setPipelines = function(pipelines) {
+  this.pipelines = pipelines;
   return this.save();
 };
 

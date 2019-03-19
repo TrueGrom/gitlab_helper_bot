@@ -30,6 +30,10 @@ class Api {
   getAwardEmojis(iid) {
     return this._api.MergeRequestAwardEmojis.all(this._projectId, iid);
   }
+
+  getPipelines(iid) {
+    return this._api.MergeRequests.pipelines(this._projectId, { mergerequestId: iid });
+  }
 }
 
 const api = new Api({ token: GITLAB_TOKEN, projectId: DEFAULT_PROJECT });

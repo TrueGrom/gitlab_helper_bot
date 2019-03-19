@@ -5,7 +5,8 @@ const MergeRequest = require("../models/merge-request");
 const logger = require("../logger");
 const { checkNewMergeRequests } = require("../utils/assign-merge-requests");
 const { sendNotifications } = require("../utils/send-notifications");
-const { updateApprovals } = require("../utils/approvals");
+const { getMetaUpdates } = require("../utils/updates");
+const { handleApprovals } = require("../utils/approvals");
 const { reportProblems } = require("../utils/merging-problems");
 
 async function updateMergeRequests() {
@@ -27,14 +28,15 @@ async function updateMergeRequests() {
 }
 
 updateMergeRequests()
-  .then(() => {
-    logger.info("Updated");
-    return checkNewMergeRequests();
-  })
-  .then(updateApprovals)
+  .then(checkNewMergeRequests)
+  .then(getMetaUpdates)
+  .then(handleApprovals)
   .then(sendNotifications)
   .then(reportProblems)
-  .then(() => process.exit(0))
+  .then(() => {
+    logger.info("updated");
+    process.exit(0);
+  })
   .catch(e => {
     logger.error(e);
     process.exit(1);

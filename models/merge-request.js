@@ -152,7 +152,7 @@ MergeRequestSchema.statics.getAllApprovers = async function() {
 
 MergeRequestSchema.statics.getOpened = function() {
   return this.find({ state: "opened", exclude: false });
-}
+};
 
 MergeRequestSchema.statics.getNotNotified = function() {
   return this.find({ state: "opened", forNotify: true, notified: false, merge_status: canBeMerged, exclude: false });
@@ -167,7 +167,7 @@ MergeRequestSchema.statics.getNotApprovedByMember = function({ _id, id }) {
   });
 };
 
-MergeRequestSchema.statics.getNotNotifiedAssigned = function(memberIds) {
+MergeRequestSchema.statics.getAssignedNotNotified = function(memberIds) {
   return this.find({
     state: "opened",
     approvalNotified: false,

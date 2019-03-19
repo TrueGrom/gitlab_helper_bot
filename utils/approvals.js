@@ -48,35 +48,12 @@ async function checkSuccessfulApprovals(assignedMergeRequest, members) {
   }
 }
 
-async function updateApprovals() {
-  try {
-    const members = await Member.getActive();
-    const assignedMergeRequests = await MergeRequest.getAssigned(members.map(member => member.id));
-    const approvals = await Promise.all(assignedMergeRequests.map(({ iid }) => api.getMergeRequestApprovals(iid)));
-    for (const approval of approvals) {
-      try {
-        const mergeRequest = assignedMergeRequests.find(({ iid }) => approval.iid === iid);
-        await mergeRequest.setApprovals(approval.approved_by.map(({ user }) => user));
-      } catch (e) {
-        logger.error(e);
-      }
-    }
-    const allEmojis = await Promise.all(assignedMergeRequests.map(({ iid }) => api.getAwardEmojis(iid)));
-    for (const [index, emoji] of allEmojis.entries()) {
-      try {
-        const mergeRequest = assignedMergeRequests[index];
-        await mergeRequest.setEmojis(emoji);
-      } catch (e) {
-        logger.error(e);
-      }
-    }
-    const notNotified = assignedMergeRequests.filter(({ approvalNotified }) => !approvalNotified);
-    await checkSuccessfulApprovals(notNotified, members);
-  } catch (e) {
-    logger.error(e);
-  }
+async function handleApprovals() {
+  const members = await Member.getActive();
+  const notNotified = await MergeRequest.getAssignedNotNotified(members.map(({ id }) => id));
+  await checkSuccessfulApprovals(notNotified, members);
 }
 
 module.exports = {
-  updateApprovals
+  handleApprovals
 };

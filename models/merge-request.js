@@ -232,6 +232,10 @@ MergeRequestSchema.methods.setEmojis = function(emojis) {
   return this.save();
 };
 
+MergeRequestSchema.methods.hasApprover = function(objectId) {
+  return this.appointed_approvers.some(_id => objectId.equals(_id));
+};
+
 MergeRequestSchema.index({ iid: 1 }, { unique: true });
 const model = mongoose.model("MergeRequest", MergeRequestSchema);
 

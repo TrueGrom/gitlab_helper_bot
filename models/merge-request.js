@@ -252,6 +252,13 @@ MergeRequestSchema.methods.setPipelines = function(pipelines) {
   return this.save();
 };
 
+MergeRequestSchema.methods.setMetaData = function({ approvals, emojis, pipelines }) {
+  this.pipelines = pipelines;
+  this.emojis = emojis;
+  this.approved_by = approvals;
+  return this.save();
+};
+
 MergeRequestSchema.methods.hasApprover = function(objectId) {
   return this.appointed_approvers.some(_id => objectId.equals(_id));
 };

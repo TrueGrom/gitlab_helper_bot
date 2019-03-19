@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const pinoms = require("pino-multi-stream");
+const bunyan = require("bunyan");
 const { LOGS_DIR } = require("./settings");
 
 if (!fs.existsSync(LOGS_DIR)) {
@@ -8,8 +8,19 @@ if (!fs.existsSync(LOGS_DIR)) {
 }
 
 const LOGS = path.join(LOGS_DIR, "common.log");
-const streams = [{ stream: process.stdout }, { stream: fs.createWriteStream(LOGS) }];
 
-const logger = pinoms({ streams });
+const logger = bunyan.createLogger({
+  name: `gitlab-helper-bot:${process.env.NODE_ENV}`,
+  streams: [
+    {
+      level: "info",
+      stream: process.stdout
+    },
+    {
+      level: "info",
+      path: LOGS
+    }
+  ]
+});
 
 module.exports = logger;

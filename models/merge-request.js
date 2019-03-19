@@ -149,7 +149,8 @@ MergeRequestSchema.statics.getNotApprovedByMember = function({ _id, id }) {
   return this.find({
     state: "opened",
     appointed_approvers: _id,
-    "approved_by.id": { $ne: id }
+    "approved_by.id": { $ne: id },
+    emojis: { $not: { $elemMatch: { "user.id": id, name: "thumbsup", awardable_type: "MergeRequest" } } }
   });
 };
 

@@ -3,6 +3,7 @@ const Message = require("../models/message");
 const MergeRequest = require("../models/merge-request");
 const Group = require("../models/group");
 const logger = require("../logger");
+const { makeReportMessage } = require("../utils/messages");
 
 async function attachUser(ctx) {
   try {
@@ -121,6 +122,19 @@ async function deleteAllMessages(ctx) {
   }
 }
 
+async function getReport(ctx) {
+  try {
+    const openedMergeRequest = await MergeRequest.getOpened();
+    if (openedMergeRequest.length) {
+      await ctx.reply(makeReportMessage(openedMergeRequest), { disable_web_page_preview: true, parse_mode: "HTML" });
+    } else {
+      await ctx.reply("Relax. No opened merge requests");
+    }
+  } catch (e) {
+    logger.error(e);
+  }
+}
+
 module.exports = {
   attachUser,
   deactivateChat,
@@ -129,5 +143,6 @@ module.exports = {
   myMergeRequests,
   deleteAllMessages,
   grantProductManager,
-  revokeProductManager
+  revokeProductManager,
+  getReport
 };

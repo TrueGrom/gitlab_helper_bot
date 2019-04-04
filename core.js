@@ -45,10 +45,11 @@ bot.command("revoke_pm", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke_pm
 bot.command("delete_all_messages", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deleteMessages"))));
 
 bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));
+
 bot.command("enable_notifications", onlyPrivate(commands.enableNotifications));
 bot.command("disable_notifications", onlyPrivate(commands.disableNotifications));
-
 bot.command("for_me", onlyPrivate(actions.myMergeRequests));
+bot.command("report", onlyPrivate(actions.getReport));
 
 bot.action(new RegExp(`(attach)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.attachUser)));
 bot.action(new RegExp(`(revoke)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.revokeApprover)));

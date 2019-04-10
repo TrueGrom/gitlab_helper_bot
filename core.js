@@ -23,6 +23,10 @@ stage.register(scenes.grant);
 stage.register(scenes.deleteMessages);
 stage.register(scenes.grantProductManager);
 stage.register(scenes.revokeProductManager);
+stage.register(scenes.grantTester);
+stage.register(scenes.revokeTester);
+stage.register(scenes.safe);
+stage.register(scenes.unsafe);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -42,6 +46,10 @@ bot.command("revoke", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke"))));
 bot.command("grant", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant"))));
 bot.command("grant_pm", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant_pm"))));
 bot.command("revoke_pm", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke_pm"))));
+bot.command("grant_tester", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant_tester"))));
+bot.command("revoke_tester", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke_tester"))));
+bot.command("safe", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("safe"))));
+bot.command("unsafe", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("unsafe"))));
 bot.command("delete_all_messages", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deleteMessages"))));
 
 bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));
@@ -62,6 +70,16 @@ bot.action(
   new RegExp(`(revokepm)_(${GITLAB_USERNAME_PATTERN.source})`),
   onlyAdmin(onlyPrivate(actions.revokeProductManager))
 );
+bot.action(
+  new RegExp(`(granttester)_(${GITLAB_USERNAME_PATTERN.source})`),
+  onlyAdmin(onlyPrivate(actions.grantTester))
+);
+bot.action(
+  new RegExp(`(revoketester)_(${GITLAB_USERNAME_PATTERN.source})`),
+  onlyAdmin(onlyPrivate(actions.revokeTester))
+);
+bot.action(new RegExp(`(^safe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.markSafe)));
+bot.action(new RegExp(`(^unsafe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.markUnsafe)));
 bot.action(/(delete_messages)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deleteAllMessages)));
 bot.action(/(deactivate)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deactivateChat)));
 

@@ -6,6 +6,7 @@ const Message = require("../models/message");
 const Group = require("../models/group");
 const { DEFAULT_PROJECT } = require("../settings");
 const { notifyGroup, makeApprovalMessage } = require("../utils/send-notifications");
+const { getManagers, getTesters, getUsernames } = require("../helpers");
 
 const THUMBSUP = "thumbsup";
 const EMOJI_TYPE = "MergeRequest";
@@ -15,10 +16,10 @@ function filterEmojis(mergeRequest) {
 }
 
 async function checkSuccessfulApprovals(assignedMergeRequest, members) {
-  const managers = members.filter(({ productManager }) => productManager);
-  const managersUsername = managers.map(({ tgUsername }) => tgUsername);
+  const managers = getManagers(members);
+  const testers = getTesters(members);
   for (const mergeRequest of assignedMergeRequest) {
-    const { approversCount } = members.find(({ id }) => mergeRequest.isAuthor(id));
+    const { approversCount, unsafe } = members.find(({ id }) => mergeRequest.isAuthor(id));
     const assigned = members.filter(({ _id }) => mergeRequest.hasApprover(_id)).map(({ id }) => id);
     const approvals = mergeRequest.approved_by.map(({ id }) => id);
     const emojiApprovals = filterEmojis(mergeRequest)
@@ -29,16 +30,19 @@ async function checkSuccessfulApprovals(assignedMergeRequest, members) {
     if (approved || emojiApproved) {
       try {
         const message = await Message.findByUrl(mergeRequest.web_url);
+        const usernames = unsafe ? getUsernames([...managers, ...testers]) : getUsernames(managers);
         if (message) {
-          const replyBody = makeApprovalMessage(mergeRequest, managersUsername, true);
+          const replyBody = makeApprovalMessage(mergeRequest, usernames, true);
           await notifyGroup(message.chat.id, replyBody, message.message_id);
         } else {
           const [group] = await Group.getByProject(DEFAULT_PROJECT);
-          const messageBody = makeApprovalMessage(mergeRequest, managersUsername);
+          const messageBody = makeApprovalMessage(mergeRequest, usernames);
           await notifyGroup(group.id, messageBody);
         }
         await mergeRequest.markApprovalAsNotified();
-        if (managers.length) {
+        if (unsafe && testers.length) {
+          await api.assignMergeRequest(mergeRequest.iid, testers[0].id);
+        } else if (managers.length) {
           await api.assignMergeRequest(mergeRequest.iid, managers[0].id);
         }
       } catch (e) {

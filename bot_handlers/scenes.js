@@ -155,6 +155,88 @@ revokeProductManager.enter(async ctx => {
   }
 });
 
+const grantTester = new Scene("grant_tester");
+grantTester.enter(async ctx => {
+  try {
+    const notTesters = await Member.getNotTesters();
+    if (notTesters.length) {
+      return ctx.reply(
+        "Select a user",
+        Markup.inlineKeyboard(
+          [...notTesters.map(user => Markup.callbackButton(user.username, `granttester_${user.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
+    }
+    return ctx.reply("All developers are testers. WTF?");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
+const revokeTester = new Scene("revoke_tester");
+revokeTester.enter(async ctx => {
+  try {
+    const testers = await Member.getTesters();
+    if (testers.length) {
+      return ctx.reply(
+        "Select a user",
+        Markup.inlineKeyboard(
+          [...testers.map(user => Markup.callbackButton(user.username, `revoketester_${user.username}`))],
+          { columns: 3 }
+        ).extra()
+      );
+    }
+    return ctx.reply("No testers");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
+const unsafe = new Scene("unsafe");
+unsafe.enter(async ctx => {
+  try {
+    const safe = await Member.getSafe();
+    if (safe.length) {
+      return ctx.reply(
+        "Select a user",
+        Markup.inlineKeyboard([...safe.map(user => Markup.callbackButton(user.username, `unsafe_${user.username}`))], {
+          columns: 3
+        }).extra()
+      );
+    }
+    return ctx.reply("All developers are unsafe. WTF? Layoff time...");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
+const safe = new Scene("safe");
+safe.enter(async ctx => {
+  try {
+    const testers = await Member.getUnsafe();
+    if (testers.length) {
+      return ctx.reply(
+        "Select a user",
+        Markup.inlineKeyboard([...testers.map(user => Markup.callbackButton(user.username, `safe_${user.username}`))], {
+          columns: 3
+        }).extra()
+      );
+    }
+    return ctx.reply("No unsafe developers");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave();
+    return ctx.reportError(e);
+  }
+});
+
 const deleteMessages = new Scene("deleteMessages");
 deleteMessages.enter(async ctx => {
   const groups = await Group.find({ active: true });
@@ -180,5 +262,9 @@ module.exports = {
   grant,
   deleteMessages,
   grantProductManager,
-  revokeProductManager
+  revokeProductManager,
+  grantTester,
+  revokeTester,
+  unsafe,
+  safe
 };

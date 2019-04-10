@@ -17,7 +17,9 @@ const MemberSchema = new mongoose.Schema({
   approversCount: { type: Number, default: 2 },
   active: { type: Boolean, default: true },
   notifications: { type: Boolean, default: false },
-  productManager: { type: Boolean, default: false }
+  productManager: { type: Boolean, default: false },
+  tester: { type: Boolean, default: false },
+  unsafe: { type: Boolean, default: false }
 });
 
 MemberSchema.statics.getNotAttached = function() {
@@ -40,6 +42,7 @@ MemberSchema.statics.getNotManagers = function() {
   return this.find({
     active: true,
     productManager: false,
+    tester: false,
     tgUsername: { $ne: null }
   });
 };
@@ -48,6 +51,43 @@ MemberSchema.statics.getManagers = function() {
   return this.find({
     active: true,
     productManager: true,
+    tgUsername: { $ne: null }
+  });
+};
+
+MemberSchema.statics.getNotTesters = function() {
+  return this.find({
+    active: true,
+    productManager: false,
+    tester: false,
+    tgUsername: { $ne: null }
+  });
+};
+
+MemberSchema.statics.getTesters = function() {
+  return this.find({
+    active: true,
+    tester: true,
+    tgUsername: { $ne: null }
+  });
+};
+
+MemberSchema.statics.getSafe = function() {
+  return this.find({
+    active: true,
+    productManager: false,
+    tester: false,
+    unsafe: false,
+    tgUsername: { $ne: null }
+  });
+};
+
+MemberSchema.statics.getUnsafe = function() {
+  return this.find({
+    active: true,
+    productManager: false,
+    tester: false,
+    unsafe: true,
     tgUsername: { $ne: null }
   });
 };
@@ -84,6 +124,38 @@ MemberSchema.statics.revokeProductManager = function(query) {
   return this.updateOne(query, {
     $set: {
       productManager: false
+    }
+  });
+};
+
+MemberSchema.statics.grantTester = function(query) {
+  return this.updateOne(query, {
+    $set: {
+      tester: true
+    }
+  });
+};
+
+MemberSchema.statics.revokeTester = function(query) {
+  return this.updateOne(query, {
+    $set: {
+      tester: false
+    }
+  });
+};
+
+MemberSchema.statics.markUnsafe = function(query) {
+  return this.updateOne(query, {
+    $set: {
+      unsafe: true
+    }
+  });
+};
+
+MemberSchema.statics.markSafe = function(query) {
+  return this.updateOne(query, {
+    $set: {
+      unsafe: false
     }
   });
 };

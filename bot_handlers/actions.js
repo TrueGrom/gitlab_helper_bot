@@ -79,6 +79,54 @@ async function revokeProductManager(ctx) {
   }
 }
 
+async function grantTester(ctx) {
+  try {
+    await Member.grantTester({ username: ctx.match[2] });
+    return ctx.editMessageText(`Tester has been granted to ${ctx.match[2]}`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
+async function revokeTester(ctx) {
+  try {
+    await Member.revokeTester({ username: ctx.match[2] });
+    return ctx.editMessageText(`Tester has been revoked from ${ctx.match[2]}`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
+async function markSafe(ctx) {
+  try {
+    await Member.markSafe({ username: ctx.match[2] });
+    return ctx.editMessageText(`${ctx.match[2]} has been marked as safe`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
+async function markUnsafe(ctx) {
+  try {
+    await Member.markUnsafe({ username: ctx.match[2] });
+    return ctx.editMessageText(`${ctx.match[2]} has been marked as unsafe`);
+  } catch (e) {
+    logger.error(e);
+    return ctx.editMessageText(e);
+  } finally {
+    ctx.scene.leave();
+  }
+}
+
 async function myMergeRequests(ctx) {
   const { username } = ctx.chat;
   try {
@@ -144,5 +192,9 @@ module.exports = {
   deleteAllMessages,
   grantProductManager,
   revokeProductManager,
-  getReport
+  getReport,
+  grantTester,
+  revokeTester,
+  markSafe,
+  markUnsafe
 };

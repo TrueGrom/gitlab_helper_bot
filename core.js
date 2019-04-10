@@ -78,8 +78,8 @@ bot.action(
   new RegExp(`(revoketester)_(${GITLAB_USERNAME_PATTERN.source})`),
   onlyAdmin(onlyPrivate(actions.revokeTester))
 );
-bot.action(new RegExp(`(safe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.markSafe)));
-bot.action(new RegExp(`(unsafe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.markUnsafe)));
+bot.action(new RegExp(`(\bsafe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.markSafe)));
+bot.action(new RegExp(`(\bunsafe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmin(onlyPrivate(actions.markUnsafe)));
 bot.action(/(delete_messages)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deleteAllMessages)));
 bot.action(/(deactivate)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deactivateChat)));
 

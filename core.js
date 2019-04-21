@@ -27,6 +27,7 @@ stage.register(scenes.grantTester);
 stage.register(scenes.revokeTester);
 stage.register(scenes.safe);
 stage.register(scenes.unsafe);
+stage.register(scenes.reassign);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -50,6 +51,7 @@ bot.command("grant_tester", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("grant_
 bot.command("revoke_tester", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("revoke_tester"))));
 bot.command("safe", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("safe"))));
 bot.command("unsafe", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("unsafe"))));
+bot.command("reassign", onlyPrivate(ctx => ctx.scene.enter("reassign")));
 bot.command("delete_all_messages", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deleteMessages"))));
 
 bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));

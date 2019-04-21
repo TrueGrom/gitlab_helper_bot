@@ -182,6 +182,19 @@ MergeRequestSchema.statics.getAssignedNotNotified = function(memberIds) {
   });
 };
 
+MergeRequestSchema.statics.getAssignedByAuthor = function(authorId) {
+  return this.find({
+    state: "opened",
+    approvalNotified: true,
+    appointed_approvers: {
+      $ne: []
+    },
+    "author.id": authorId,
+    merge_status: canBeMerged,
+    exclude: false
+  });
+};
+
 MergeRequestSchema.statics.getCanNotBeMerged = function(memberIds) {
   return this.find({
     state: "opened",
@@ -234,6 +247,11 @@ MergeRequestSchema.methods.isAuthor = function(memberId) {
 MergeRequestSchema.methods.appointApprovers = function(...memberObjectIds) {
   this.appointed_approvers = [...memberObjectIds];
   this.forNotify = true;
+  return this.save();
+};
+
+MergeRequestSchema.methods.reassignApprovers = function(...memberObjectIds) {
+  this.appointed_approvers = [...memberObjectIds];
   return this.save();
 };
 

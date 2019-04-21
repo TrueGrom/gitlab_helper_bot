@@ -26,8 +26,8 @@ MemberSchema.statics.getNotAttached = function() {
   return this.find({ tgUsername: { $eq: null } });
 };
 
-MemberSchema.statics.getApprovers = function() {
-  return this.find({ active: true, approver: true, tgUsername: { $ne: null } });
+MemberSchema.statics.getApprovers = function(query) {
+  return this.find({ active: true, approver: true, tgUsername: { $ne: null }, ...query });
 };
 
 MemberSchema.statics.getNotApprovers = function() {

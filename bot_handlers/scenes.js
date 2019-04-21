@@ -266,12 +266,12 @@ const reassign = new Scene("reassign");
 reassign.enter(async ctx => {
   try {
     const author = await Member.findOne({ tgUsername: ctx.chat.username });
-    const mergerequests = await MergeRequest.getAssignedByAuthor(author.id);
-    if (mergerequests.length) {
+    const mergeRequests = await MergeRequest.getAssignedByAuthor(author.id);
+    if (mergeRequests.length) {
       return ctx.reply(
         "Select a merge request",
         Markup.inlineKeyboard(
-          [...mergerequests.map(mr => Markup.callbackButton(`${mr.title.slice(0, 30)}...`, `reassign_${mr.iid}`))],
+          [...mergeRequests.map(mr => Markup.callbackButton(`${mr.title.slice(0, 30)}...`, `reassign_${mr.iid}`))],
           {
             columns: 1
           }

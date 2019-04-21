@@ -185,12 +185,10 @@ MergeRequestSchema.statics.getAssignedNotNotified = function(memberIds) {
 MergeRequestSchema.statics.getAssignedByAuthor = function(authorId) {
   return this.find({
     state: "opened",
-    approvalNotified: true,
     appointed_approvers: {
       $ne: []
     },
     "author.id": authorId,
-    merge_status: canBeMerged,
     exclude: false
   });
 };

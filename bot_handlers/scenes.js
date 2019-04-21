@@ -1,8 +1,15 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const Member = require("../models/member");
+const MergeRequest = require("../models/merge-request");
+const Message = require("../models/message");
 const Group = require("../models/group");
 const logger = require("../logger");
+const { notifyGroup } = require("../utils/send-notifications");
+
+const clearSession = () => ctx => {
+  ctx.session = null;
+};
 
 async function selectGitlabMember(ctx) {
   try {
@@ -255,6 +262,118 @@ deleteMessages.enter(async ctx => {
   return ctx.reply("No active groups");
 });
 
+const reassign = new Scene("reassign");
+reassign.enter(async ctx => {
+  try {
+    const author = await Member.findOne({ tgUsername: ctx.chat.username });
+    const mergerequests = await MergeRequest.getAssignedByAuthor(author.id);
+    if (mergerequests.length) {
+      return ctx.reply(
+        "Select a merge request",
+        Markup.inlineKeyboard(
+          [...mergerequests.map(mr => Markup.callbackButton(`${mr.title.slice(0, 30)}...`, `reassign_${mr.iid}`))],
+          {
+            columns: 1
+          }
+        ).extra()
+      );
+    }
+    return ctx.reply("No opened merge requests");
+  } catch (e) {
+    logger.error(e);
+    ctx.scene.leave(clearSession());
+    return ctx.reportError(e);
+  }
+});
+
+reassign.action(/(reassign_)(\d+)/, async ctx => {
+  const iid = ctx.match[2];
+  try {
+    const mergeRequest = await MergeRequest.findOne({ iid }).populate("appointed_approvers");
+    ctx.session.mergeRequestIid = mergeRequest.iid;
+    ctx.session.excludeIds = [mergeRequest.author.id, ...mergeRequest.appointed_approvers.map(({ id }) => id)];
+    return ctx.editMessageText(
+      "Select developer to replace",
+      Markup.inlineKeyboard(
+        [
+          ...mergeRequest.appointed_approvers.map(({ name, id }) =>
+            Markup.callbackButton(`${name}...`, `reassign_user_${id}`)
+          )
+        ],
+        {
+          columns: 2
+        }
+      ).extra()
+    );
+  } catch (e) {
+    ctx.editMessageText("An error has occurred").catch(logger.error);
+    logger.error(e);
+    ctx.scene.leave(clearSession());
+    return ctx.reportError(e);
+  }
+});
+
+reassign.action(/(reassign_user_)(\d+)/, async ctx => {
+  try {
+    const replacedId = ctx.match[2];
+    ctx.session.replacedId = parseInt(replacedId, 10);
+    const approvers = await Member.getApprovers({ id: { $nin: [replacedId, ...ctx.session.excludeIds] } });
+    return ctx.editMessageText(
+      "Select new approver",
+      Markup.inlineKeyboard(
+        [...approvers.map(({ name, id }) => Markup.callbackButton(`${name}...`, `assign_user_${id}_`))],
+        {
+          columns: 2
+        }
+      ).extra()
+    );
+  } catch (e) {
+    ctx.editMessageText("An error has occurred").catch(logger.error);
+    logger.error(e);
+    ctx.scene.leave(clearSession());
+    return ctx.reportError(e);
+  }
+});
+
+reassign.action(/(assign_user_)(\d+)/, async ctx => {
+  try {
+    const assignedId = ctx.match[2];
+    const assignedApprover = await Member.findOne({ id: assignedId });
+    const mergeRequest = await MergeRequest.findOne({ iid: ctx.session.mergeRequestIid }).populate(
+      "appointed_approvers"
+    );
+    const replacedApprover = mergeRequest.appointed_approvers.find(({ id }) => ctx.session.replacedId === id);
+    const withoutReplaced = mergeRequest.appointed_approvers.filter(({ id }) => replacedApprover.id !== id);
+    await mergeRequest.reassignApprovers(...withoutReplaced.map(({ _id }) => _id), assignedApprover._id);
+    const message = await Message.findByUrl(mergeRequest.web_url);
+    if (message) {
+      const hashTags = `\n#reassignment #for_${assignedApprover.tgUsername}`;
+      const replyBody = `@${replacedApprover.tgUsername} has been replaced by @${
+        assignedApprover.tgUsername
+      }${hashTags}`;
+      notifyGroup(message.chat.id, replyBody, message.message_id).catch(logger.error);
+    }
+    ctx.telegram
+      .sendMessage(
+        assignedApprover.tgId,
+        `You has been assigned as approver for \n${mergeRequest.title}\n${mergeRequest.web_url}`
+      )
+      .catch(logger.error);
+    ctx.telegram.sendSticker(assignedApprover.tgId, "CAADAgADQAAD-swRDX1CanhPdID-Ag").catch(logger.error);
+    return ctx.editMessageText(
+      `Successful reassignment <b>${replacedApprover.name}</b> -> <b>${assignedApprover.name}</b>`,
+      { parse_mode: "HTML" }
+    );
+  } catch (e) {
+    ctx.editMessageText("An error has occurred").catch(logger.error);
+    logger.error(e);
+    return ctx.reportError(e);
+  } finally {
+    ctx.scene.leave(clearSession());
+  }
+});
+reassign.leave(clearSession());
+
 module.exports = {
   attach,
   deactivate,
@@ -266,5 +385,6 @@ module.exports = {
   grantTester,
   revokeTester,
   unsafe,
-  safe
+  safe,
+  reassign
 };

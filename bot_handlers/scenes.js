@@ -356,7 +356,7 @@ reassign.action(/(assign_user_)(\d+)/, async ctx => {
     ctx.telegram
       .sendMessage(
         assignedApprover.tgId,
-        `You has been assigned as approver for \n${mergeRequest.title}\n${mergeRequest.web_url}`
+        `You have been assigned as approver for \n${mergeRequest.title}\n${mergeRequest.web_url}`
       )
       .catch(logger.error);
     ctx.telegram.sendSticker(assignedApprover.tgId, "CAADAgADQAAD-swRDX1CanhPdID-Ag").catch(logger.error);

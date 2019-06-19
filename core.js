@@ -53,6 +53,7 @@ bot.command("safe", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("safe"))));
 bot.command("unsafe", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("unsafe"))));
 bot.command("reassign", onlyPrivate(ctx => ctx.scene.enter("reassign")));
 bot.command("delete_all_messages", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("deleteMessages"))));
+bot.command("update", onlyAdmin(onlyPrivate(commands.updateDatabaseFromChat)));
 
 bot.command("activate", onlyAdmin(onlyGroup(commands.activateChat)));
 

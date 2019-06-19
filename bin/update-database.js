@@ -27,14 +27,22 @@ async function updateDatabase() {
   ]);
 }
 
-module.exports = updateDatabase;
+module.exports = {
+  updateDatabase
+};
 
-updateDatabase()
-  .then(() => {
-    logger.info("Database has been updated");
-    process.exit(0);
-  })
-  .catch(e => {
-    logger.error(e);
-    process.exit(1);
-  });
+if (require.main === module) {
+  updateDatabase()
+    .then(() => {
+      logger.info("Database has been updated");
+      process.exit(0);
+    })
+    .catch(e => {
+      logger.error(e);
+      process.exit(1);
+    });
+} else {
+  module.exports = {
+    updateDatabase
+  };
+}

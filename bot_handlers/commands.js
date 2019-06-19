@@ -1,6 +1,7 @@
 const Group = require("../models/group");
 const Member = require("../models/member");
 const Project = require("../models/project");
+const { updateDatabase } = require("../bin/update-database");
 const logger = require("../logger");
 const { DEFAULT_PROJECT } = require("../settings");
 
@@ -61,8 +62,25 @@ async function disableNotifications(ctx) {
   }
 }
 
+async function updateDatabaseFromChat(ctx) {
+  try {
+    if (ctx.session.updateProgress) {
+      return ctx.reply("Update in progress");
+    }
+    ctx.session.updateProgress = true;
+    await updateDatabase();
+    return ctx.reply("Database has been updated");
+  } catch (e) {
+    logger.error(e);
+    return ctx.reportError(e);
+  } finally {
+    ctx.session.updateProgress = null;
+  }
+}
+
 module.exports = {
   activateChat,
   enableNotifications,
-  disableNotifications
+  disableNotifications,
+  updateDatabaseFromChat
 };

@@ -8,6 +8,17 @@ services:
     env_file:
       - .env
     network_mode: host
+  bot-webhook:
+    container_name: bot-webhook
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      BOT_MODE: webhook
+    ports:
+      - ${BOT_PORT}
+    network_mode: host
   bot-cron-job:
     container_name: bot-cron-job
     build:

@@ -31,14 +31,9 @@ stage.register(scenes.reassign);
 
 bot.use(session());
 bot.use(stage.middleware());
-express.use(bot.webhookCallback(EXPRESS_PATH));
 bot.catch(err => logger.error(err));
 bot.telegram.getMe().then(botInfo => {
   bot.options.username = botInfo.username;
-});
-
-express.listen(BOT_PORT, () => {
-  logger.info(`listening on port ${BOT_PORT}`);
 });
 
 bot.command("attach", onlyAdmin(onlyPrivate(ctx => ctx.scene.enter("attach"))));
@@ -86,4 +81,19 @@ bot.action(new RegExp(`(^unsafe)_(${GITLAB_USERNAME_PATTERN.source})`), onlyAdmi
 bot.action(/(delete_messages)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deleteAllMessages)));
 bot.action(/(deactivate)_(-\d+)/, onlyAdmin(onlyPrivate(actions.deactivateChat)));
 
-bot.telegram.setWebhook(SECRET_LOCATION + SECRET_PATH);
+(async () => {
+  try {
+    if (process.env.BOT_MODE === "webhook") {
+      express.use(bot.webhookCallback(EXPRESS_PATH));
+      express.listen(BOT_PORT, () => {
+        logger.info(`listening on port ${BOT_PORT}`);
+      });
+      await bot.telegram.setWebhook(SECRET_LOCATION + SECRET_PATH);
+    } else {
+      await bot.telegram.deleteWebhook();
+      bot.startPolling();
+    }
+  } catch (e) {
+    logger.fatal(e);
+  }
+})();

@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  bot-polling:
+    container_name: bot-polling
+    build:
+      context: .
+    env_file:
+      - .env
+    network_mode: host
+  bot-cron-job:
+    container_name: bot-cron-job
+    build:
+      context: .
+    env_file:
+      - .env
+    command: ["node", "bin/check"]
+    network_mode: host

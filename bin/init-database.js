@@ -1,3 +1,4 @@
+const uniqBy = require("lodash/uniqBy");
 const api = require("../api");
 const logger = require("../logger");
 const Project = require("../models/project");
@@ -10,7 +11,11 @@ async function initDatabase() {
     api.getProjectMembers(),
     api.getAllMergeRequests()
   ]);
-  return Promise.all([Project.create(project), MergeRequest.insertMany(mergeRequests), Member.insertMany(members)]);
+  return Promise.all([
+    Project.create(project),
+    MergeRequest.insertMany(mergeRequests),
+    Member.insertMany(uniqBy(members, "id"))
+  ]);
 }
 
 module.exports = initDatabase;

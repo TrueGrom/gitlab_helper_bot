@@ -1,0 +1,7 @@
+.git
+.circleci
+node_modules
+npm-debug
+.vscode
+.idea
+.env

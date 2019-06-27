@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const { DB_NAME, DB_PASS, DB_USER } = require("./settings");
+const { DB_URL } = require("./settings");
 const logger = require("./logger");
 
-mongoose.connect(`mongodb://${DB_USER}:${DB_PASS}@localhost/${DB_NAME}`, {
+mongoose.connect(DB_URL, {
   useNewUrlParser: true,
   useCreateIndex: true
 });

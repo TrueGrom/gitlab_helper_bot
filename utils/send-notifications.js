@@ -30,9 +30,9 @@ function makeNotifyMessage(author, approvers, mergeRequest) {
     title,
     web_url
   } = mergeRequest;
-  return `${approverNames}\n<b>New merge request from</b> <i>${name}</i> (@${
-    author.tgUsername
-  })\n${title}\n<a href="${web_url}">${web_url}</a>\n${hashTags}`;
+  const from = author.tgUsername ? ` (@${author.tgUsername})` : "";
+  return `${approverNames}\n<b>New merge request from</b> <i>${name}</i>${from}
+${title}\n<a href="${web_url}">${web_url}</a>\n${hashTags}`;
 }
 
 async function notifyGroup(groupId, message, replyTo) {

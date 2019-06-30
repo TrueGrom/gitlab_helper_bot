@@ -6,7 +6,7 @@ const logger = require("../logger");
 async function reportProblems() {
   try {
     await MergeRequest.updateProblemStatuses();
-    const members = await Member.getActive();
+    const members = await Member.getActiveAttached();
     const memberIds = members.filter(({ notifications }) => notifications).map(({ id }) => id);
     const canNotBeMerged = await MergeRequest.getCanNotBeMerged(memberIds);
     for (const mergeRequest of canNotBeMerged) {

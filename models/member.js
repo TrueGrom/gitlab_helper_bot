@@ -93,6 +93,10 @@ MemberSchema.statics.getUnsafe = function() {
 };
 
 MemberSchema.statics.getActive = function() {
+  return this.find({ active: true });
+};
+
+MemberSchema.statics.getActiveAttached = function() {
   return this.find({ active: true, tgUsername: { $ne: null } });
 };
 

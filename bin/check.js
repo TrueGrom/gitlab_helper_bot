@@ -23,7 +23,9 @@ async function updateMergeRequests() {
       }
     }));
   const newMergeRequest = mergeRequests.filter(({ iid }) => !mergeRequestIds[iid]);
-  await MergeRequest.bulkWrite(updateBulkOperations);
+  if (updateBulkOperations.length) {
+    await MergeRequest.bulkWrite(updateBulkOperations);
+  }
   await MergeRequest.insertMany(newMergeRequest);
 }
 

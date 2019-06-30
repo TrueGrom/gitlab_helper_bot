@@ -11,7 +11,9 @@ async function assignApprovers(newMergeRequests, members) {
   const mergeRequestCount = _.countBy(_.flatten(_.map(appointedApprovers, "appointed_approvers")));
   for (const mergeRequest of newMergeRequests) {
     const author = members.find(({ id }) => mergeRequest.isAuthor(id));
-    const approvers = members.filter(({ id, approver }) => !mergeRequest.isAuthor(id) && approver);
+    const approvers = members
+      .filter(({ id, approver }) => !mergeRequest.isAuthor(id) && approver)
+      .filter(({ tgUsername }) => tgUsername !== null);
     const sortedApprovers = _.sortBy(approvers, ({ _id }) => mergeRequestCount[_id] || 0).slice(
       0,
       author.getApproversCount()

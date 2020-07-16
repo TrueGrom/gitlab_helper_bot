@@ -9,7 +9,7 @@
     "bunyan": "^1.8.12",
     "express": "^4.17.1",
     "gitlab": "^4.5.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "mongodb": "^3.2.7",
     "mongoose": "^5.7.5",
     "telegraf": "^3.30.1"

@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "bunyan": "^1.8.12",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "gitlab": "^4.5.1",
     "lodash": "^4.17.11",
     "mongodb": "^3.2.7",
